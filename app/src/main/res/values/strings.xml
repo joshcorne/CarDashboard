@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Car Dashboard</string>
+    <string name="shuffle_btn_text">Shuffle my music</string>
+</resources>
