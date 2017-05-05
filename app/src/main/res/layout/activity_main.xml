@@ -9,12 +9,177 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="uk.co.joshcorne.cardashboard.MainActivity">
 
-    <Button
+    <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/shuffle_btn_text"
-        android:id="@+id/button"
+        android:inputType="textPersonName"
+        android:ems="10"
         android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/mapsSearch"
+        android:textAlignment="textStart"
+        android:hint="@string/maps_search_placeholder"
+        android:layout_toStartOf="@+id/mapsSearchBtn"
+        android:layout_above="@+id/btnPanel"/>
+
+    <Button
+        android:text="@string/settings_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/settingsBtn"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentStart="true" />
+        android:onClick="openSettings"/>
+
+    <Button
+        android:text="@string/search_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/mapsSearchBtn"
+        android:onClick="goSomewhere"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"/>
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/mapsSearchBtn"
+        android:stretchColumns="0,1"
+        android:weightSum="5"
+        android:id="@+id/btnPanel"
+        android:layout_above="@+id/settingsBtn">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <Button
+                android:text="@string/start_btn_text"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:id="@+id/journeyBtn"
+                android:onClick="startJourney"/>
+
+            <Button
+                android:text="@string/home_btn"
+                android:id="@+id/homeBtn"
+                android:onClick="goHome"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"/>
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="3">
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clickable="true"
+                android:onClick="openStats"
+                android:fillViewport="true"
+                android:id="@+id/stats_panel">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:onClick="openStats"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:text="@string/stats_panel_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/stats_panel_title"
+                        android:textStyle="normal|bold"
+                        android:textAlignment="center"
+                        android:onClick="openStats"
+
+                        android:textSize="24sp"/>
+
+                    <TextView
+                        android:text="@string/live_speed"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/speedTextView"/>
+
+                    <TextView
+                        android:text="@string/live_fuel_consumption"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/consumptionTextView"/>
+
+                    <TextView
+                        android:text="@string/live_fuel_pressure"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/pressureTextView"/>
+
+                    <TextView
+                        android:text="@string/live_revs"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/revsTextView"/>
+                </LinearLayout>
+            </ScrollView>
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clickable="true"
+                android:onClick="openAlerts"
+                android:fillViewport="true"
+                android:id="@+id/alerts_panel">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:onClick="openAlerts">
+
+                    <TextView
+                        android:text="@string/alerts_panel_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/alerts_panel_title"
+                        android:textStyle="normal|bold"
+                        android:textAlignment="center"
+                        android:textSize="24sp"
+                        android:onClick="openAlerts"/>
+                </LinearLayout>
+            </ScrollView>
+        </TableRow>
+
+    </TableLayout>
+
+    <Button
+        android:text="Play"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/playMusicBtn"
+        android:layout_above="@+id/settingsBtn"
+        android:layout_centerHorizontal="true"
+        android:onClick="playMusic"/>
+
+    <Button
+        android:text="Next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/nextMusicBtn"
+        android:layout_above="@+id/settingsBtn"
+        android:layout_alignParentEnd="true"
+        android:onClick="skipSong"/>
+
+    <Button
+        android:text="Previous"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/settingsBtn"
+        android:layout_alignParentStart="true"
+        android:id="@+id/prevMusicBtn"
+        android:onClick="previousSong"/>
+
 </RelativeLayout>

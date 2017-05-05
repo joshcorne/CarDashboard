@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="make">
+        <item>Mazda</item>
+        <item>Lexus</item>
+        <item>Toyota</item>
+        <item>Nissan</item>
+        <item>GM</item>
+        <item>Chrysler</item>
+        <item>Ford</item>
+        <item>Honda</item>
+        <item>Infiniti</item>
+        <item>Jaguar</item>
+        <item>Kia</item>
+        <item>Land Rover</item>
+        <item>Mazda</item>
+        <item>Saab</item>
+        <item>Audi</item>
+        <item>Volkswagen</item>
+        <item>Mercedes-Benz</item>
+        <item>Acura</item>
+        <item>Subaru</item>
+        <item>Hyundai</item>
+        <item>Isuzu</item>
+        <item>BMW</item>
+        <item>Suzuki</item>
+    </string-array>
+</resources>
