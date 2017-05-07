@@ -35,6 +35,13 @@
         android:entryValues="@array/make"
         android:title="@string/pref_title_make" />
 
+    <ListPreference
+        android:defaultValue="@string/miles"
+        android:key="general_distance_format"
+        android:entries="@array/imperial_distance"
+        android:entryValues="@array/imperial_distance"
+        android:title="@string/distance_format_title" />
+
     <SwitchPreference
         android:defaultValue="true"
         android:key="general_track_on_nav"
@@ -43,5 +50,9 @@
     <Preference android:title="Connect to OBD reader"
                 android:key="obdConnect"
                 android:summary="Click to connect"/>
+
+    <Preference android:title="Logout of Spotify"
+                android:key="spotifyLogout"
+                android:summary="Click to logout"/>
 
 </PreferenceScreen>

@@ -36,4 +36,9 @@ dependencies {
     compile project(':spotify-player-24-noconnect-2.20b')
     compile 'com.github.pires:obd-java-api:1.0'
     compile 'com.github.satyan:sugar:1.4'
+    compile('se.michaelthelin.spotify:spotify-web-api-java:1.5.0') {
+        exclude group: "commons-beanutils", module: "commons-beanutils"
+
+    }
+    compile 'commons-beanutils:commons-beanutils:20030211.134440'
 }

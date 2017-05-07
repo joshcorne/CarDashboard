@@ -11,22 +11,24 @@ import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceScreen;
 import android.support.v7.app.ActionBar;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.github.pires.obd.commands.protocol.EchoOffCommand;
 import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
 import com.github.pires.obd.commands.protocol.ObdResetCommand;
 import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
 import com.github.pires.obd.commands.protocol.TimeoutCommand;
+import com.github.pires.obd.commands.temperature.AmbientAirTemperatureCommand;
 import com.github.pires.obd.enums.ObdProtocols;
+import com.spotify.sdk.android.player.Player;
+import com.spotify.sdk.android.player.SpotifyPlayer;
 
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +48,7 @@ import static uk.co.joshcorne.cardashboard.SettingsActivity.GeneralPreferenceFra
  */
 public class SettingsActivity extends AppCompatPreferenceActivity
 {
-    private static final String TAG = "CARDASHBOARD";
+    private static final String TAG = "CARDASH";
     public static boolean OBDCONNECTED = false;
     /**
      * A preference value change listener that updates the preference's summary
@@ -197,6 +199,28 @@ public class SettingsActivity extends AppCompatPreferenceActivity
                     }
                 });
             }
+
+            Preference spotify = findPreference("spotifyLogout");
+            if(spotify != null)
+            {
+                if(MainActivity.mPlayer != null && MainActivity.OAUTH != null)
+                {
+                    spotify.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener()
+                    {
+                        @Override
+                        public boolean onPreferenceClick(Preference preference)
+                        {
+                            MainActivity.mPlayer.logout();
+                            return true;
+                        }
+                    });
+                }
+                else
+                {
+                    PreferenceScreen screen = getPreferenceScreen();
+                    screen.removePreference(spotify);
+                }
+            }
         }
 
         @Override
@@ -252,7 +276,9 @@ class ConnectTask extends AsyncTask<String, Void, Socket>
             new EchoOffCommand().run(sock.getInputStream(), sock.getOutputStream());
             new LineFeedOffCommand().run(sock.getInputStream(), sock.getOutputStream());
             new TimeoutCommand(OBDTIMEOUT).run(sock.getInputStream(), sock.getOutputStream());
-            new SelectProtocolCommand(ObdProtocols.AUTO).run(sock.getInputStream(), sock.getOutputStream());
+            SelectProtocolCommand protocolCommand = new SelectProtocolCommand(ObdProtocols.AUTO);
+            protocolCommand.run(sock.getInputStream(), sock.getOutputStream());
+            //new AmbientAirTemperatureCommand().run(sock.getInputStream(), sock.getOutputStream());
             return sock;
         }
         catch(Exception e)

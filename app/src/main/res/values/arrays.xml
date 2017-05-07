@@ -25,4 +25,9 @@
         <item>BMW</item>
         <item>Suzuki</item>
     </string-array>
+
+    <string-array name="imperial_distance">
+        <item>Miles</item>
+        <item>Kilometres</item>
+    </string-array>
 </resources>

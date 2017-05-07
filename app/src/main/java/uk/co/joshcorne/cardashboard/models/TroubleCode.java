@@ -1,6 +1,7 @@
 package uk.co.joshcorne.cardashboard.models;
 
 import com.orm.SugarRecord;
+import com.orm.dsl.Table;
 import com.orm.query.Select;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.List;
  * Created by josh on 4/27/17.
  */
 
+@Table
 public class TroubleCode extends SugarRecord
 {
     private String code;

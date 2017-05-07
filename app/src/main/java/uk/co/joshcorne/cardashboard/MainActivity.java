@@ -1,6 +1,7 @@
 package uk.co.joshcorne.cardashboard;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -22,9 +24,16 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.pires.obd.commands.protocol.EchoOffCommand;
+import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
+import com.github.pires.obd.commands.protocol.ObdResetCommand;
+import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
+import com.github.pires.obd.commands.protocol.TimeoutCommand;
+import com.github.pires.obd.enums.ObdProtocols;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
+import com.spotify.sdk.android.authentication.SpotifyNativeAuthUtil;
 import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Error;
@@ -32,6 +41,10 @@ import com.spotify.sdk.android.player.Player;
 import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
+import com.wrapper.spotify.Api;
+import com.wrapper.spotify.methods.GetMySavedTracksRequest;
+import com.wrapper.spotify.models.LibraryTrack;
+import com.wrapper.spotify.models.Page;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,9 +53,12 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import uk.co.joshcorne.cardashboard.models.Journey;
 import uk.co.joshcorne.cardashboard.models.Ping;
@@ -52,7 +68,6 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
     public static boolean TRACKING = false;
     public Intent tracker;
-    public boolean PLAYING_MUSIC = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -92,13 +107,13 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     @Override
     protected void onDestroy()
     {
+        super.onDestroy();
         stopService(tracker);
         unregisterReceiver(updateUi);
         unregisterReceiver(updateAlerts);
-        if(PLAYING_MUSIC)
+        if(mPlayer != null)
         {
             Spotify.destroyPlayer(this);
-            PLAYING_MUSIC = false;
         }
     }
 
@@ -147,31 +162,43 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
     public void startMusic(View view)
     {
-        playMusic(view);
-        Snackbar.make(view, "Not implemented.", Snackbar.LENGTH_SHORT).show();
+        if(mPlayer != null)
+        {
+            Log.d("CARDASH", "Music resumed.");
+            mPlayer.resume(null);
+            toggleMusicBtnState();
+        }
+        else
+        {
+            playMusic(view);
+        }
     }
 
     public void stopMusic(View view)
     {
-        if(PLAYING_MUSIC)
+        if(mPlayer != null && mPlayer.getPlaybackState().isPlaying)
         {
+            Log.d("CARDASH", "Music paused.");
             mPlayer.pause(null);
+            toggleMusicBtnState();
         }
     }
 
     public void skipSong(View view)
     {
-        if(PLAYING_MUSIC)
+        if(mPlayer != null && mPlayer.getPlaybackState().isPlaying && mPlayer.getMetadata().nextTrack != null)
         {
-            mPlayer.skipToPrevious(null);
+            Log.d("CARDASH", "Skipping song.");
+            mPlayer.skipToNext(null);
         }
     }
 
     public void previousSong(View view)
     {
-        if(PLAYING_MUSIC)
+        if(mPlayer != null && mPlayer.getPlaybackState().isPlaying && mPlayer.getMetadata().prevTrack != null)
         {
-            mPlayer.skipToNext(null);
+            Log.d("CARDASH", "Previous song.");
+            mPlayer.skipToPrevious(null);
         }
     }
 
@@ -266,11 +293,10 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                         stopMusic(view);
                     }
                 });
-                PLAYING_MUSIC = true;
             }
             else
             {
-                playButton.setText(getResources().getString(R.string.pause_button_text));
+                playButton.setText(getResources().getString(R.string.play_button_text));
                 playButton.setOnClickListener(new View.OnClickListener()
                 {
                     @Override
@@ -279,23 +305,8 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                         startMusic(view);
                     }
                 });
-                PLAYING_MUSIC = false;
             }
         }
-    }
-
-    public void calculateNewStats()
-    {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor edit = sp.edit();
-        List<Ping> pings = new ArrayList<>();
-        float avgSpeed = 0;
-        for (Ping p : pings)
-        {
-            avgSpeed += p.getSpeed();
-        }
-        edit.putFloat("avgSpeed", avgSpeed);
-        edit.apply();
     }
 
     protected double getAvgSpeed(List<Journey> journeys)
@@ -308,16 +319,41 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         return avgSpeed / journeys.size();
     }
 
-    private static final String CLIENT_ID = "c7ec83d0851649a4845bf6354fdd7c9f";
-    private static final String REDIRECT_URI = "cardash://callback";
-    private static final int REQUEST_CODE = 1337;
-    private Player mPlayer;
-    private static final String SPOTIFYAPI = "https://api.spotify.com/v1/me/tracks";
-    private static final String SPOTIFYMARKET = "GB";
-    private static String OAUTH;
+    private final String CLIENT_ID = "c7ec83d0851649a4845bf6354fdd7c9f";
+    private final String REDIRECT_URI = "cardash://callback";
+    private final int REQUEST_CODE = 1337;
+    protected static Player mPlayer;
+    protected static String OAUTH;
+    private ProgressDialog progressDialog;
+    private int queueCounter = 0;
+    Page<LibraryTrack> tracks = null;
+    private Player.OperationCallback callback = new Player.OperationCallback()
+    {
+        @Override
+        public void onSuccess()
+        {
+            if(queueCounter<tracks.getItems().size())
+            {
+                mPlayer.queue(callback, tracks.getItems().get(++queueCounter).getTrack().getUri());
+            }
+        }
+
+        @Override
+        public void onError(Error error)
+        {
+            Log.d("CARDASH", "Queueing failed.");
+        }
+    };
 
     public void playMusic(View view)
     {
+
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle("Loading");
+        progressDialog.setMessage("Wait while loading...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
                 AuthenticationResponse.Type.TOKEN,
                 REDIRECT_URI);
@@ -362,104 +398,85 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     @Override
     public void onLoggedIn()
     {
-        List<String> trackUris = new ArrayList<>();
+        Api api = Api.builder().accessToken(OAUTH).build();
 
-        String json = null;
+        GetMySavedTracksRequest request = api.getMySavedTracks()
+                .limit(50)
+                .build();
 
-        //This should 100% not be done on the UI thread.
+        MusicTask ct = new MusicTask();
+
         try
         {
-            URL url = new URL(SPOTIFYAPI + "?market=" + SPOTIFYMARKET);
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.addRequestProperty("Authorization", OAUTH);
-            urlConnection.addRequestProperty("Content-type", "application/json");
-            urlConnection.addRequestProperty("Accept", "application/json");
-
-            try
-            {
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                StringBuilder stringBuilder = new StringBuilder();
-                String line;
-                while ((line = bufferedReader.readLine()) != null)
-                {
-                    stringBuilder.append(line).append("\n");
-                }
-                bufferedReader.close();
-                json = stringBuilder.toString();
-            }
-            finally
-            {
-                urlConnection.disconnect();
-            }
+            tracks = ct.execute(request).get();
         }
         catch (Exception e)
         {
-            Log.e("ERROR", e.getMessage(), e);
-            Toast.makeText(this, "Loading music failed.", Toast.LENGTH_SHORT).show();
+            Log.e("CARDASH", e.getMessage());
         }
 
-        //Pull URIs out of JSON
-        try
-        {
-            JSONObject obj = new JSONObject(json);
-            JSONArray tracks = obj.getJSONArray("items");
-
-            if (tracks != null)
-            {
-                for (int i = 0; i < tracks.length(); i++)
-                {
-                    //Traverse the JSON to the URI and add to list
-                    trackUris.add(tracks.getJSONObject(i).getJSONObject("track").getString("uri"));
-                }
-            }
-
-        }
-        catch (JSONException e)
-        {
-            Toast.makeText(this, "Loading music failed.", Toast.LENGTH_SHORT).show();
-        }
-
-        if (trackUris.size() > 0)
+        if(tracks != null)
         {
             //Play first track
-            mPlayer.playUri(null, trackUris.get(0), 0, 0);
-
-            PLAYING_MUSIC = true;
-
-            if (trackUris.size() > 1)
+            final Page<LibraryTrack> finalTracks = tracks;
+            mPlayer.playUri(new Player.OperationCallback()
             {
-                //Queue the rest of their tracks
-                for (int i = 1; i < trackUris.size(); i++)
+                @Override
+                public void onSuccess()
                 {
-                    mPlayer.queue(null, trackUris.get(i));
-                }
-            }
-        }
+                    mPlayer.queue(callback, tracks.getItems().get(++queueCounter).getTrack().getUri());
 
+                    toggleMusicBtnState();
+
+                    progressDialog.dismiss();
+
+                    //Shuffle so it isn't the same all the time
+                    mPlayer.setShuffle(null, true);
+                    //Repeat to keep the tunes going
+                    mPlayer.setRepeat(null, true);
+
+                }
+
+                @Override
+                public void onError(Error error)
+                {
+                    Toast.makeText(getApplicationContext(), "Playback failure.", Toast.LENGTH_SHORT).show();
+                }
+            }, "spotify:user:spotify:playlist:37i9dQZEVXcFiuHqbpjDn7", 1, 0);
+        }
+        else
+        {
+            Toast.makeText(this, "Could not get user tracks.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
     public void onLoggedOut()
     {
-
+        Log.d("CARDASH", "onLoggedOut");
     }
 
     @Override
     public void onLoginFailed(Error error)
     {
 
+        if(error == Error.kSpErrorNeedsPremium)
+        {
+            Toast.makeText(this, "You need Spotify premium.", Toast.LENGTH_SHORT).show();
+        }
+        Log.d("CARDASH", error.toString());
     }
 
     @Override
     public void onTemporaryError()
     {
-
+        Log.d("CARDASH", "onTemporaryError");
     }
 
     @Override
     public void onConnectionMessage(String s)
     {
-
+        Log.d("CARDASH", "onConnectionMessage");
     }
 
     @Override
@@ -467,6 +484,9 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     {
         switch (playerEvent)
         {
+            case kSpPlaybackNotifyTrackDelivered:
+                Log.d("CARDASH", "Track delivered.");
+                break;
             default:
                 break;
         }
@@ -507,10 +527,30 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                     @Override
                     public void onError(Throwable throwable)
                     {
-
+                        Log.e("CARDASH", "Spotify.getPlayer.onError");
                     }
                 });
             }
         }
     }
 }
+
+class MusicTask extends AsyncTask<GetMySavedTracksRequest, Void, Page<LibraryTrack>>
+{
+    protected Page<LibraryTrack> doInBackground(GetMySavedTracksRequest... params) {
+        try
+        {
+            return params[0].get();
+        }
+        catch(Exception e)
+        {
+            return null;
+        }
+    }
+
+    protected void onPostExecute(String... params) {
+        // TODO: check this.exception
+        // TODO: do something with the feed
+    }
+}
+

@@ -5,6 +5,7 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.pires.obd.commands.control.TroubleCodesCommand;
@@ -30,6 +31,15 @@ public class AlertsActivity extends AppCompatActivity
         setTitle("Alerts");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        List<TroubleCode> t = TroubleCode.find(TroubleCode.class, "dtc_key = ? and dtc_make = ?", "B0001", "Generic");
+
+        TextView desc = (TextView) findViewById(R.id.trouble_code_desc);
+        if(desc != null && t.size() > 0)
+        {
+            desc.setText(t.get(0).getDescription());
+        }
+
+        /*
         try
         {
             if(sock != null && SettingsActivity.OBDCONNECTED)
@@ -69,5 +79,6 @@ public class AlertsActivity extends AppCompatActivity
         {
             Toast.makeText(this, "Code lookup failed.", Toast.LENGTH_SHORT).show();
         }
+        */
     }
 }

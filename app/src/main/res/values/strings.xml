@@ -37,8 +37,12 @@
     <string name="default_ip_addr">192.168.0.10</string>
 
     <string name="play_button_text">Play</string>
-    <string name="pause_button_text">Play</string>
-    <string name="skip_button_text">Play</string>
-    <string name="prev_button_text">Play</string>
+    <string name="pause_button_text">Pause</string>
+    <string name="skip_button_text">Next</string>
+    <string name="prev_button_text">Previous</string>
+    <string name="journey_statistics_title">Journey Statistics</string>
+    <string name="statistics_title">Statistics</string>
+    <string name="distance_format_title">Distance Format</string>
+    <string name="miles">Miles</string>
 
 </resources>

@@ -14,4 +14,13 @@
     tools:context="uk.co.joshcorne.cardashboard.AlertsActivity"
     tools:showIn="@layout/activity_alerts">
 
+    <TextView
+        android:text="TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/trouble_code_desc"
+        android:layout_alignParentEnd="true"
+        android:textSize="18sp"/>
 </RelativeLayout>

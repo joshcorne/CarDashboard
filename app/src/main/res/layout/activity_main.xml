@@ -60,7 +60,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:id="@+id/journeyBtn"
-                android:onClick="startJourney"/>
+                android:onClick="startJourney">
+                <requestFocus />
+            </Button>
 
             <Button
                 android:text="@string/home_btn"
@@ -156,16 +158,16 @@
     </TableLayout>
 
     <Button
-        android:text="Play"
+        android:text="@string/play_button_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/playMusicBtn"
         android:layout_above="@+id/settingsBtn"
         android:layout_centerHorizontal="true"
-        android:onClick="playMusic"/>
+        android:onClick="startMusic"/>
 
     <Button
-        android:text="Next"
+        android:text="@string/skip_button_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/nextMusicBtn"
@@ -174,7 +176,7 @@
         android:onClick="skipSong"/>
 
     <Button
-        android:text="Previous"
+        android:text="@string/prev_button_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/settingsBtn"

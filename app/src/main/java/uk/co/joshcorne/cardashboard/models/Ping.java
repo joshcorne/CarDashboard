@@ -8,12 +8,12 @@ public class Ping
 {
     private double latitude;
     private double longitude;
-    private float mpg;
+    private double mpg;
     private double speed;
     private double altitude;
-    private float fuelPressure;
-    private float rpm;
-    private float acceleration;
+    private double fuelPressure;
+    private double rpm;
+    private double acceleration;
     private long time;
     private int id;
 
@@ -42,12 +42,12 @@ public class Ping
         this.longitude = longitude;
     }
 
-    public float getMpg()
+    public double getMpg()
     {
         return mpg;
     }
 
-    public void setMpg(float mpg)
+    public void setMpg(double mpg)
     {
         this.mpg = mpg;
     }
@@ -72,32 +72,32 @@ public class Ping
         this.altitude = altitude;
     }
 
-    public float getFuelPressure()
+    public double getFuelPressure()
     {
         return fuelPressure;
     }
 
-    public void setFuelPressure(float fuelPressure)
+    public void setFuelPressure(double fuelPressure)
     {
         this.fuelPressure = fuelPressure;
     }
 
-    public float getRpm()
+    public double getRpm()
     {
         return rpm;
     }
 
-    public void setRpm(float rpm)
+    public void setRpm(double rpm)
     {
         this.rpm = rpm;
     }
 
-    public float getAcceleration()
+    public double getAcceleration()
     {
         return acceleration;
     }
 
-    public void setAcceleration(float acceleration)
+    public void setAcceleration(double acceleration)
     {
         this.acceleration = acceleration;
     }

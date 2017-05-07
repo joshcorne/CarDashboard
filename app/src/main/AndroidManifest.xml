@@ -7,22 +7,31 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
 
-    <uses-feature android:name="android.hardware.location.gps" />
+    <uses-feature android:name="android.hardware.location.gps"/>
 
-    <meta-data android:name="DATABASE" android:value="car.db" />
-    <meta-data android:name="VERSION" android:value="1" />
-    <meta-data android:name="QUERY_LOG" android:value="true" />
-    <meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="uk.co.joshcorne.cardashboard.models" />
+    <meta-data
+        android:name="DATABASE"
+        android:value="car.db"/>
+    <meta-data
+        android:name="VERSION"
+        android:value="1"/>
+    <meta-data
+        android:name="QUERY_LOG"
+        android:value="true"/>
+    <meta-data
+        android:name="DOMAIN_PACKAGE_NAME"
+        android:value="uk.co.joshcorne.cardashboard.models"/>
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/car_icon"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
@@ -62,6 +71,11 @@
         <activity
             android:name="com.spotify.sdk.android.authentication.LoginActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+        <activity android:name=".uk.co.joshcorne.cardashboard.adapters.JourneyActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="uk.co.joshcorne.cardashboard.StatsActivity"/>
+        </activity>
     </application>
 
 </manifest>
