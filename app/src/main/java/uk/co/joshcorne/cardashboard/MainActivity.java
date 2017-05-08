@@ -8,8 +8,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -30,6 +33,7 @@ import com.github.pires.obd.commands.protocol.ObdResetCommand;
 import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
 import com.github.pires.obd.commands.protocol.TimeoutCommand;
 import com.github.pires.obd.enums.ObdProtocols;
+import com.orm.SugarContext;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
@@ -51,11 +55,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URL;
+import java.security.Permission;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -74,6 +84,20 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if(!checkDataBase())
+        {
+            try
+            {
+                copyDataBase();
+                Log.d("CARDASH", "DB copied.");
+            }
+            catch (IOException e)
+            {
+                Toast.makeText(this, "Setup failed.", Toast.LENGTH_SHORT).show();
+                Log.e("CARDASH", "Could not copy DB.");
+            }
+        }
 
         tracker = new Intent(this, TrackerService.class);
 
@@ -115,6 +139,61 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         {
             Spotify.destroyPlayer(this);
         }
+    }
+
+    protected void copyDataBase() throws IOException
+    {
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
+        {
+            //Open your local db as the input stream
+            InputStream myInput = this.getAssets().open("car.db");
+
+            // Path to the just created empty db
+            String outFileDir = this.getFilesDir().getPath() + File.separator + "databases";
+            String outFileName = outFileDir + File.separator + "car.db";
+
+            File file = new File(outFileDir);
+            file.mkdirs();
+
+            //Open the empty db as the output stream
+            OutputStream myOutput = new FileOutputStream(outFileName);
+
+            //transfer bytes from the inputfile to the outputfile
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = myInput.read(buffer)) > 0)
+            {
+                myOutput.write(buffer, 0, length);
+            }
+
+            //Close the streams
+            myOutput.flush();
+            myOutput.close();
+            myInput.close();
+        }
+    }
+    protected boolean checkDataBase()
+    {
+        SQLiteDatabase checkDB = null;
+        try
+        {
+            String myPath = getApplicationContext().getFilesDir().getPath() + "/databases/" + "car.db";
+            checkDB = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
+        }
+        catch(SQLiteException e)
+        {
+            Log.d("CARDASH", "DB does not exist yet.");
+            //database does't exist yet.
+
+        }
+
+        if(checkDB != null)
+        {
+            checkDB.close();
+        }
+
+        return checkDB != null;
     }
 
     private void openGoogleMaps(String search)

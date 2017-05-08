@@ -125,6 +125,20 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:id="@+id/revsTextView"/>
+
+                    <TextView
+                        android:text="@string/all_time_speed_average"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/allTimeSpeedAvgTextView"/>
+
+                    <TextView
+                        android:text="@string/all_time_consumption_rate_average"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:maxWidth="200dp"
+                        android:id="@+id/allTimeConsumptionAvgTextView"/>
+
                 </LinearLayout>
             </ScrollView>
 

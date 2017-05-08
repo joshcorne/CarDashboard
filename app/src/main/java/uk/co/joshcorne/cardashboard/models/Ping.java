@@ -1,10 +1,12 @@
 package uk.co.joshcorne.cardashboard.models;
 
+import com.orm.SugarRecord;
+
 /**
  * Created by josh on 3/9/17.
  */
 
-public class Ping
+public class Ping extends SugarRecord
 {
     private double latitude;
     private double longitude;
@@ -15,7 +17,6 @@ public class Ping
     private double rpm;
     private double acceleration;
     private long time;
-    private int id;
 
     public Ping()
     {
@@ -110,10 +111,5 @@ public class Ping
     public void setTime(long time)
     {
         this.time = time;
-    }
-
-    public int getId()
-    {
-        return id;
     }
 }

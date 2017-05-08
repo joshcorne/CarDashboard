@@ -12,7 +12,7 @@
 #   Decrease Java heap size (-Xmx/-Xms)
 #   Decrease number of Java threads
 #   Decrease Java thread stack sizes (-Xss)
-#   Set larger code cache with -XX:ReservedCodeCacheSize=
+#   Set larger dtcKey cache with -XX:ReservedCodeCacheSize=
 # This output file may be truncated or incomplete.
 #
 #  Out of Memory Error (os_linux.cpp:2627), pid=26647, tid=0x00007fca027b5700
@@ -27,7 +27,7 @@
 Current thread (0x00007fca14077800):  VMThread [stack: 0x00007fca026b5000,0x00007fca027b6000] [id=26656]
 
 Stack: [0x00007fca026b5000,0x00007fca027b6000],  sp=0x00007fca027b44c0,  free space=1021k
-Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+Native frames: (J=compiled Java dtcKey, j=interpreted, Vv=VM dtcKey, C=native dtcKey)
 V  [libjvm.so+0x9d9fcd]  VMError::report_and_die()+0x15d
 V  [libjvm.so+0x4b4d4a]  report_vm_out_of_memory(char const*, int, unsigned long, VMErrorType, char const*)+0x8a
 V  [libjvm.so+0x845190]  os::pd_commit_memory(char*, unsigned long, unsigned long, bool)+0xf0
@@ -99,15 +99,15 @@ CodeCache: size=245760Kb used=5808Kb max_used=5808Kb free=239951Kb
  compilation: enabled
 
 Compilation events (10 events):
-Event: 7.031 Thread 0x00007fca140bd000 nmethod 1754 0x00007fca055a1690 code [0x00007fca055a18a0, 0x00007fca055a2348]
-Event: 7.031 Thread 0x00007fca140bd000 1759       3       com.android.dx.cf.code.RopperMachine::getSources (264 bytes)
-Event: 7.052 Thread 0x00007fca140bd000 nmethod 1759 0x00007fca055a2850 code [0x00007fca055a2e40, 0x00007fca055a76d8]
-Event: 7.052 Thread 0x00007fca140bd000 1762       3       com.android.dx.cf.code.BaseMachine::popArgs (62 bytes)
-Event: 7.052 Thread 0x00007fca140bd000 nmethod 1762 0x00007fca055aa9d0 code [0x00007fca055aab80, 0x00007fca055ab218]
-Event: 7.053 Thread 0x00007fca140bd000 1750 %     3       com.android.dx.dex.code.RopTranslator::pickOrder @ 190 (400 bytes)
-Event: 7.070 Thread 0x00007fca140bd000 nmethod 1750% 0x00007fca055ab490 code [0x00007fca055ab7e0, 0x00007fca055adb98]
+Event: 7.031 Thread 0x00007fca140bd000 nmethod 1754 0x00007fca055a1690 dtcKey [0x00007fca055a18a0, 0x00007fca055a2348]
+Event: 7.031 Thread 0x00007fca140bd000 1759       3       com.android.dx.cf.dtcKey.RopperMachine::getSources (264 bytes)
+Event: 7.052 Thread 0x00007fca140bd000 nmethod 1759 0x00007fca055a2850 dtcKey [0x00007fca055a2e40, 0x00007fca055a76d8]
+Event: 7.052 Thread 0x00007fca140bd000 1762       3       com.android.dx.cf.dtcKey.BaseMachine::popArgs (62 bytes)
+Event: 7.052 Thread 0x00007fca140bd000 nmethod 1762 0x00007fca055aa9d0 dtcKey [0x00007fca055aab80, 0x00007fca055ab218]
+Event: 7.053 Thread 0x00007fca140bd000 1750 %     3       com.android.dx.dex.dtcKey.RopTranslator::pickOrder @ 190 (400 bytes)
+Event: 7.070 Thread 0x00007fca140bd000 nmethod 1750% 0x00007fca055ab490 dtcKey [0x00007fca055ab7e0, 0x00007fca055adb98]
 Event: 7.071 Thread 0x00007fca140bd000 1747       3       com.android.dx.ssa.back.LivenessAnalyzer::constructInterferenceGraph (47 bytes)
-Event: 7.071 Thread 0x00007fca140bd000 nmethod 1747 0x00007fca055af390 code [0x00007fca055af540, 0x00007fca055af978]
+Event: 7.071 Thread 0x00007fca140bd000 nmethod 1747 0x00007fca055af390 dtcKey [0x00007fca055af540, 0x00007fca055af978]
 Event: 7.071 Thread 0x00007fca140bd000 1748       3       com.android.dx.ssa.back.FirstFitLocalCombiningAllocator::handleUnassociatedParameters (60 bytes)
 
 GC Heap History (10 events):
@@ -226,8 +226,8 @@ Event: 4.681 Thread 0x00007fca1413c800 Uncommon trap: reason=bimorphic action=ma
 Event: 4.885 Thread 0x00007fca14136000 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007fca0538e89c method=com.android.dx.rop.cst.Constant.compareTo(Lcom/android/dx/rop/cst/Constant;)I @ 12
 Event: 5.698 Thread 0x00007fca1413c800 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007fca0537d278 method=java.util.HashMap.putVal(ILjava/lang/Object;Ljava/lang/Object;ZZ)Ljava/lang/Object; @ 162
 Event: 5.738 Thread 0x00007fca1413c800 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007fca054695a8 method=java.util.HashMap.getNode(ILjava/lang/Object;)Ljava/util/HashMap$Node; @ 84
-Event: 6.184 Thread 0x00007fca14136000 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007fca052f84dc method=com.android.dx.rop.code.RegisterSpec.equals(ILcom/android/dx/rop/type/TypeBearer;Lcom/android/dx/rop/code/LocalItem;)Z @ 42
-Event: 6.361 Thread 0x00007fca1413c800 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007fca0533712c method=com.android.dx.rop.code.RegisterSpec.equals(ILcom/android/dx/rop/type/TypeBearer;Lcom/android/dx/rop/code/LocalItem;)Z @ 42
+Event: 6.184 Thread 0x00007fca14136000 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007fca052f84dc method=com.android.dx.rop.dtcKey.RegisterSpec.equals(ILcom/android/dx/rop/type/TypeBearer;Lcom/android/dx/rop/dtcKey/LocalItem;)Z @ 42
+Event: 6.361 Thread 0x00007fca1413c800 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007fca0533712c method=com.android.dx.rop.dtcKey.RegisterSpec.equals(ILcom/android/dx/rop/type/TypeBearer;Lcom/android/dx/rop/dtcKey/LocalItem;)Z @ 42
 
 Internal exceptions (7 events):
 Event: 0.046 Thread 0x00007fca1400a000 Exception <a 'java/lang/NoSuchMethodError': Method sun.misc.Unsafe.defineClass(Ljava/lang/String;[BII)Ljava/lang/Class; name or signature does not match> (0x00000000eab07cc0) thrown at [/ssd/Android/AOSP-openjdk/external/jetbrains/jdk/hotspot/src/share/vm

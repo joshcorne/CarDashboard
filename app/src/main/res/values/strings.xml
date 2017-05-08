@@ -44,5 +44,9 @@
     <string name="statistics_title">Statistics</string>
     <string name="distance_format_title">Distance Format</string>
     <string name="miles">Miles</string>
+    <string name="all_time_speed_average">All time speed average:</string>
+    <string name="all_time_consumption_rate_average">All time consumption rate average:</string>
+    <string name="alerts_title">Alerts</string>
+    <string name="pref_header_obd">OBD2 Reader</string>
 
 </resources>

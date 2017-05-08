@@ -2,9 +2,6 @@ package uk.co.joshcorne.cardashboard.models;
 
 import com.orm.SugarRecord;
 import com.orm.dsl.Table;
-import com.orm.query.Select;
-
-import java.util.List;
 
 /**
  * Created by josh on 4/27/17.
@@ -13,35 +10,35 @@ import java.util.List;
 @Table
 public class TroubleCode extends SugarRecord
 {
-    private String code;
-    private String oem;
-    private String description;
+    private String dtcKey;
+    private String dtcMake;
+    private String dtcValue;
 
     public TroubleCode(){}
 
-    public TroubleCode(String code, String oem)
+    public TroubleCode(String dtcKey, String dtcMake)
     {
-        this.code = code;
-        this.oem = oem;
+        this.dtcKey = dtcKey;
+        this.dtcMake = dtcMake;
     }
 
-    public String getCode()
+    public String getDtcKey()
     {
-        return code;
+        return dtcKey;
     }
 
-    public String getOem()
+    public String getDtcMake()
     {
-        return oem;
+        return dtcMake;
     }
 
-    public String getDescription()
+    public String getDtcValue()
     {
-        return description;
+        return dtcValue;
     }
 
-    public void setDescription(String description)
+    public void setDtcValue(String dtcValue)
     {
-        this.description = description;
+        this.dtcValue = dtcValue;
     }
 }

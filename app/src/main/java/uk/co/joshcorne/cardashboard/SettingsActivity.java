@@ -32,8 +32,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import static uk.co.joshcorne.cardashboard.SettingsActivity.GeneralPreferenceFragment.ip;
-import static uk.co.joshcorne.cardashboard.SettingsActivity.GeneralPreferenceFragment.port;
+import static uk.co.joshcorne.cardashboard.SettingsActivity.ObdPreferenceFragment.ip;
+import static uk.co.joshcorne.cardashboard.SettingsActivity.ObdPreferenceFragment.port;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -166,28 +166,21 @@ public class SettingsActivity extends AppCompatPreferenceActivity
     protected boolean isValidFragment(String fragmentName)
     {
         return PreferenceFragment.class.getName().equals(fragmentName)
-                || GeneralPreferenceFragment.class.getName().equals(fragmentName);
+                || GeneralPreferenceFragment.class.getName().equals(fragmentName)
+                || ObdPreferenceFragment.class.getName().equals(fragmentName);
     }
 
-    /**
-     * This fragment shows general preferences only. It is used when the
-     * activity is showing a two-pane settings UI.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class GeneralPreferenceFragment extends PreferenceFragment
+    public static class ObdPreferenceFragment extends PreferenceFragment
     {
         @Override
         public void onCreate(Bundle savedInstanceState)
         {
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_general);
+            addPreferencesFromResource(R.xml.pref_obd);
             setHasOptionsMenu(true);
 
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            bindPreferenceSummaryToValue(findPreference("general_home_addr"));
+            bindPreferenceSummaryToValue(findPreference("general_ip_addr"));
+            bindPreferenceSummaryToValue(findPreference("general_ip_port"));
 
             Preference button = findPreference("obdConnect");
             if (button != null) {
@@ -198,28 +191,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity
                         return true;
                     }
                 });
-            }
-
-            Preference spotify = findPreference("spotifyLogout");
-            if(spotify != null)
-            {
-                if(MainActivity.mPlayer != null && MainActivity.OAUTH != null)
-                {
-                    spotify.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener()
-                    {
-                        @Override
-                        public boolean onPreferenceClick(Preference preference)
-                        {
-                            MainActivity.mPlayer.logout();
-                            return true;
-                        }
-                    });
-                }
-                else
-                {
-                    PreferenceScreen screen = getPreferenceScreen();
-                    screen.removePreference(spotify);
-                }
             }
         }
 
@@ -258,6 +229,62 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             {
                 OBDCONNECTED = false;
             }
+        }
+    }
+
+    /**
+     * This fragment shows general preferences only. It is used when the
+     * activity is showing a two-pane settings UI.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public static class GeneralPreferenceFragment extends PreferenceFragment
+    {
+        @Override
+        public void onCreate(Bundle savedInstanceState)
+        {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_general);
+            setHasOptionsMenu(true);
+
+            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
+            // to their values. When their values change, their summaries are
+            // updated to reflect the new value, per the Android Design
+            // guidelines.
+            bindPreferenceSummaryToValue(findPreference("general_home_addr"));
+
+            Preference spotify = findPreference("spotifyLogout");
+            if(spotify != null)
+            {
+                if(MainActivity.mPlayer != null && MainActivity.OAUTH != null)
+                {
+                    spotify.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener()
+                    {
+                        @Override
+                        public boolean onPreferenceClick(Preference preference)
+                        {
+                            MainActivity.mPlayer.logout();
+                            return true;
+                        }
+                    });
+                }
+                else
+                {
+                    PreferenceScreen screen = getPreferenceScreen();
+                    screen.removePreference(spotify);
+                }
+            }
+        }
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item)
+        {
+            int id = item.getItemId();
+            if (id == android.R.id.home)
+            {
+                startActivity(new Intent(getActivity(), SettingsActivity.class));
+                return true;
+            }
+            return super.onOptionsItemSelected(item);
         }
     }
 }

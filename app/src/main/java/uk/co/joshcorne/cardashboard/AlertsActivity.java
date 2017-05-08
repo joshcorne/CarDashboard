@@ -1,21 +1,15 @@
 package uk.co.joshcorne.cardashboard;
 
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.github.pires.obd.commands.control.TroubleCodesCommand;
-
-import java.io.IOException;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import uk.co.joshcorne.cardashboard.models.TroubleCode;
-
-import static uk.co.joshcorne.cardashboard.SettingsActivity.GeneralPreferenceFragment.sock;
 
 public class AlertsActivity extends AppCompatActivity
 {
@@ -28,7 +22,7 @@ public class AlertsActivity extends AppCompatActivity
         setContentView(R.layout.activity_alerts);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        setTitle("Alerts");
+        setTitle(getString(R.string.alerts_title));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         List<TroubleCode> t = TroubleCode.find(TroubleCode.class, "dtc_key = ? and dtc_make = ?", "B0001", "Generic");
@@ -36,7 +30,7 @@ public class AlertsActivity extends AppCompatActivity
         TextView desc = (TextView) findViewById(R.id.trouble_code_desc);
         if(desc != null && t.size() > 0)
         {
-            desc.setText(t.get(0).getDescription());
+            desc.setText(t.get(0).getDtcValue());
         }
 
         /*

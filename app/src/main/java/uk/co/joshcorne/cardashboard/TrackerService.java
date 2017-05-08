@@ -35,7 +35,7 @@ import java.util.TimerTask;
 import uk.co.joshcorne.cardashboard.models.Journey;
 import uk.co.joshcorne.cardashboard.models.Ping;
 
-import static uk.co.joshcorne.cardashboard.SettingsActivity.GeneralPreferenceFragment.sock;
+import static uk.co.joshcorne.cardashboard.SettingsActivity.ObdPreferenceFragment.sock;
 
 public class TrackerService extends Service
 {
@@ -44,7 +44,7 @@ public class TrackerService extends Service
     private Location mLocation;
     private boolean recordLocation = true;
 
-    private static final String TAG = "CARDASHBOARD";
+    private static final String TAG = "CARDASH";
     private final IBinder binder = new ServiceBinder();
     NotificationManager notificationManager;
     public static final int NOTIFICATION_ID = 1;

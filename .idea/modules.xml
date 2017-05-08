@@ -4,6 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/CarDashboard.iml" filepath="$PROJECT_DIR$/CarDashboard.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spotify-android-auth-1.0.0/spotify-android-auth-1.0.0.iml" filepath="$PROJECT_DIR$/spotify-android-auth-1.0.0/spotify-android-auth-1.0.0.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spotify-player-24-noconnect-2.20b/spotify-player-24-noconnect-2.20b.iml" filepath="$PROJECT_DIR$/spotify-player-24-noconnect-2.20b/spotify-player-24-noconnect-2.20b.iml" />
     </modules>
   </component>
 </project>

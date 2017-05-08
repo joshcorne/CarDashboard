@@ -10,24 +10,6 @@
         android:singleLine="true"
         android:title="@string/pref_title_display_name" />
 
-    <EditTextPreference
-        android:capitalize="words"
-        android:defaultValue="@string/default_ip_addr"
-        android:inputType="textCapWords"
-        android:key="general_ip_addr"
-        android:maxLines="1"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:title="@string/pref_title_ip_addr" />
-
-    <EditTextPreference
-        android:title="@string/pref_title_ip_port"
-        android:inputType="number"
-        android:key="general_ip_port"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:defaultValue="@string/pref_default_ip_port" />
-
     <ListPreference
         android:defaultValue="@string/pref_default_make"
         android:key="general_oem"
@@ -46,10 +28,6 @@
         android:defaultValue="true"
         android:key="general_track_on_nav"
         android:title="@string/pref_title_track_on_nav" />
-
-    <Preference android:title="Connect to OBD reader"
-                android:key="obdConnect"
-                android:summary="Click to connect"/>
 
     <Preference android:title="Logout of Spotify"
                 android:key="spotifyLogout"
