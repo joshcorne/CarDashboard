@@ -57,10 +57,12 @@
 
             <Button
                 android:text="@string/start_btn_text"
-                android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:id="@+id/journeyBtn"
-                android:onClick="startJourney">
+                android:onClick="startJourney"
+                android:layout_width="match_parent"
+                android:focusable="true"
+                android:focusableInTouchMode="true">
                 <requestFocus />
             </Button>
 
@@ -73,7 +75,6 @@
         </TableRow>
 
         <TableRow
-            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="3">
 
@@ -93,7 +94,7 @@
 
                     <TextView
                         android:text="@string/stats_panel_title"
-                        android:layout_width="match_parent"
+                        android:layout_width="158dp"
                         android:layout_height="wrap_content"
                         android:id="@+id/stats_panel_title"
                         android:textStyle="normal|bold"
@@ -103,41 +104,74 @@
                         android:textSize="24sp"/>
 
                     <TextView
+                        android:text="@string/live_subheading"
+                        android:layout_width="126dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:id="@+id/live_subheading"
+                        android:textSize="18sp"
+                        android:textStyle="normal|bold"/>
+
+                    <TextView
                         android:text="@string/live_speed"
-                        android:layout_width="match_parent"
+                        android:layout_width="157dp"
                         android:layout_height="wrap_content"
                         android:id="@+id/speedTextView"/>
 
                     <TextView
                         android:text="@string/live_fuel_consumption"
-                        android:layout_width="match_parent"
+                        android:layout_width="152dp"
                         android:layout_height="wrap_content"
                         android:id="@+id/consumptionTextView"/>
 
                     <TextView
                         android:text="@string/live_fuel_pressure"
-                        android:layout_width="match_parent"
+                        android:layout_width="151dp"
                         android:layout_height="wrap_content"
                         android:id="@+id/pressureTextView"/>
 
                     <TextView
                         android:text="@string/live_revs"
-                        android:layout_width="match_parent"
+                        android:layout_width="157dp"
                         android:layout_height="wrap_content"
                         android:id="@+id/revsTextView"/>
 
                     <TextView
+                        android:text="@string/all_time_subheading"
+                        android:layout_width="108dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:id="@+id/all_time_subheading"
+                        tools:text="All time"
+                        android:textSize="18sp"
+                        android:textStyle="normal|bold"/>
+
+                    <TextView
                         android:text="@string/all_time_speed_average"
-                        android:layout_width="match_parent"
+                        android:layout_width="152dp"
                         android:layout_height="wrap_content"
                         android:id="@+id/allTimeSpeedAvgTextView"/>
 
                     <TextView
+                        android:text="@string/all_time_revs_average"
+                        android:layout_width="167dp"
+                        android:layout_height="wrap_content"
+                        android:maxWidth="200dp"
+                        android:id="@+id/allTimeRevsAvgTextView"/>
+
+                    <TextView
                         android:text="@string/all_time_consumption_rate_average"
-                        android:layout_width="match_parent"
+                        android:layout_width="167dp"
                         android:layout_height="wrap_content"
                         android:maxWidth="200dp"
                         android:id="@+id/allTimeConsumptionAvgTextView"/>
+
+                    <TextView
+                        android:text="@string/all_time_pressure_average"
+                        android:layout_width="167dp"
+                        android:layout_height="wrap_content"
+                        android:maxWidth="200dp"
+                        android:id="@+id/allTimePressureAvgTextView"/>
 
                 </LinearLayout>
             </ScrollView>
@@ -165,6 +199,12 @@
                         android:textAlignment="center"
                         android:textSize="24sp"
                         android:onClick="openAlerts"/>
+
+                    <TextView
+                        android:text="@string/no_trouble_codes_home"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/code"/>
                 </LinearLayout>
             </ScrollView>
         </TableRow>
@@ -173,29 +213,34 @@
 
     <Button
         android:text="@string/play_button_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/playMusicBtn"
         android:layout_above="@+id/settingsBtn"
         android:layout_centerHorizontal="true"
-        android:onClick="startMusic"/>
-
-    <Button
-        android:text="@string/skip_button_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/nextMusicBtn"
-        android:layout_above="@+id/settingsBtn"
-        android:layout_alignParentEnd="true"
-        android:onClick="skipSong"/>
+        android:onClick="startMusic"
+        android:background="@drawable/round_button"
+        android:layout_width="60dp"
+        android:layout_height="60dp"/>
 
     <Button
         android:text="@string/prev_button_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/settingsBtn"
-        android:layout_alignParentStart="true"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:id="@+id/prevMusicBtn"
-        android:onClick="previousSong"/>
+        android:onClick="previousSong"
+        android:background="@drawable/round_button"
+        android:layout_marginEnd="45dp"
+        android:layout_above="@+id/settingsBtn"
+        android:layout_toStartOf="@+id/playMusicBtn"/>
+
+    <Button
+        android:text="@string/skip_button_text"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:id="@+id/nextMusicBtn"
+        android:onClick="skipSong"
+        android:background="@drawable/round_button"
+        android:layout_above="@+id/settingsBtn"
+        android:layout_toEndOf="@+id/playMusicBtn"
+        android:layout_marginStart="45dp"/>
 
 </RelativeLayout>

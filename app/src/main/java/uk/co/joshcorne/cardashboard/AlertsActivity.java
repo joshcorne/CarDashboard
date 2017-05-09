@@ -1,19 +1,37 @@
 package uk.co.joshcorne.cardashboard;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.github.pires.obd.commands.control.TroubleCodesCommand;
+import com.orm.SugarApp;
+import com.orm.SugarContext;
+import com.orm.SugarDb;
+import com.orm.query.Select;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
 import uk.co.joshcorne.cardashboard.models.TroubleCode;
+import uk.co.joshcorne.cardashboard.uk.co.joshcorne.cardashboard.adapters.StatsListAdapter;
+
+import static uk.co.joshcorne.cardashboard.SettingsActivity.ObdPreferenceFragment.sock;
 
 public class AlertsActivity extends AppCompatActivity
 {
-    List<TroubleCode> receivedCodes;
+    List<String> receivedCodes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -23,44 +41,51 @@ public class AlertsActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setTitle(getString(R.string.alerts_title));
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //TODO getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        List<TroubleCode> t = TroubleCode.find(TroubleCode.class, "dtc_key = ? and dtc_make = ?", "B0001", "Generic");
+        receivedCodes = getIntent().getStringArrayListExtra("codes");
+        String[] receivedDescs = new String[receivedCodes.size()];
 
-        TextView desc = (TextView) findViewById(R.id.trouble_code_desc);
-        if(desc != null && t.size() > 0)
-        {
-            desc.setText(t.get(0).getDtcValue());
-        }
-
-        /*
+        TroubleCode troubleCode;
         try
         {
             if(sock != null && SettingsActivity.OBDCONNECTED)
             {
-                //Run command and get result
-                TroubleCodesCommand troubleCodesCommand = new TroubleCodesCommand();
-                troubleCodesCommand.run(sock.getInputStream(), sock.getOutputStream());
-                String response = troubleCodesCommand.getFormattedResult();
-
                 //Make sure they have set the oem
                 String oem = PreferenceManager.getDefaultSharedPreferences(this).getString("car_make", "unset");
                 if(!oem.equals("unset"))
                 {
-                    //Find a specific code description
-                    List<TroubleCode> troubleCodes = TroubleCode.find(TroubleCode.class, "dtc_key = ? and dtc_make = ?", response, oem);
-                    if(troubleCodes.isEmpty())
+                    for (int i = 0; i < receivedCodes.size(); i++)
                     {
-                        //Otherwise find a generic
-                        troubleCodes = TroubleCode.find(TroubleCode.class, "dtc_key = ? and dtc_make = ?", response, "Generic");
-                        if(troubleCodes.isEmpty())
+                        try
                         {
-                            //No code found
-                            throw new Exception("Code not found.");
+                            //Find a specific code description
+                            List<TroubleCode> select = TroubleCode.find(TroubleCode.class, "dtc_key = ? and dtc_make = ?", receivedCodes.get(i), oem);
+                            if (select.size() < 1)
+                            {
+                                //Otherwise find a generic
+                                select = TroubleCode.find(TroubleCode.class, "dtc_key = ? and dtc_make = ?", receivedCodes.get(i), "Generic");
+                                if (select.size() < 1)
+                                {
+                                    //No code found
+                                    throw new Exception("Code not found.");
+                                }
+                                else
+                                {
+                                    troubleCode = select.get(0);
+                                }
+                            }
+                            else
+                            {
+                                troubleCode = select.get(0);
+                            }
+                            receivedDescs[i] = troubleCode.getDtcValue();
+                        }
+                        catch (Exception e)
+                        {
+                            receivedDescs[i] = e.getMessage();
                         }
                     }
-                    //Return code
-                    receivedCodes.add(troubleCodes.get(0));
                 }
                 else
                 {
@@ -73,6 +98,13 @@ public class AlertsActivity extends AppCompatActivity
         {
             Toast.makeText(this, "Code lookup failed.", Toast.LENGTH_SHORT).show();
         }
-        */
+
+        ListView alertListView = (ListView) findViewById(R.id.alerts_desc_list);
+        StatsListAdapter listAdapter = new StatsListAdapter(this, receivedCodes.toArray(new String[receivedCodes.size()]), receivedDescs);
+        if(alertListView != null)
+        {
+            listAdapter.getCount();
+            alertListView.setAdapter(listAdapter);
+        }
     }
 }

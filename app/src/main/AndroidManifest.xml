@@ -42,9 +42,9 @@
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
             android:parentActivityName=".MainActivity">
-            <meta-data
+            <!--meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="uk.co.joshcorne.cardashboard.MainActivity"/>
+                android:value="uk.co.joshcorne.cardashboard.MainActivity"/-->
         </activity>
 
         <service
@@ -58,26 +58,17 @@
             android:label="@string/title_activity_stats"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="uk.co.joshcorne.cardashboard.MainActivity"/>
         </activity>
         <activity
             android:name=".AlertsActivity"
             android:label="@string/title_activity_alerts"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="uk.co.joshcorne.cardashboard.MainActivity"/>
         </activity>
         <activity
             android:name="com.spotify.sdk.android.authentication.LoginActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
-        <activity android:name=".uk.co.joshcorne.cardashboard.adapters.JourneyActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="uk.co.joshcorne.cardashboard.StatsActivity"/>
+        <activity android:name=".JourneyActivity">
         </activity>
     </application>
 

@@ -9,10 +9,10 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="uk.co.joshcorne.cardashboard.uk.co.joshcorne.cardashboard.adapters.JourneyActivity">
+    tools:context="uk.co.joshcorne.cardashboard.JourneyActivity">
 
     <TextView
-        android:text="Journey"
+        android:text="@string/journey_heading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -21,7 +21,7 @@
         android:textSize="36sp"/>
 
     <TextView
-        android:text="TextView"
+        android:text="@string/journey_max_speed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="14sp"
@@ -31,7 +31,7 @@
         android:layout_marginTop="17dp"/>
 
     <TextView
-        android:text="TextView"
+        android:text="@string/journey_max_revs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/max_consumption"
@@ -41,7 +41,7 @@
         android:layout_marginTop="17dp"/>
 
     <TextView
-        android:text="Maximums"
+        android:text="@string/journey_maximums_subheading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/journey_date"
@@ -51,7 +51,7 @@
         android:textSize="24sp"/>
 
     <TextView
-        android:text="Averages"
+        android:text="@string/journey_averages_subheading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/max_pressure"
@@ -61,7 +61,7 @@
         android:textSize="24sp"/>
 
     <TextView
-        android:text="TextView"
+        android:text="@string/journey_avg_revs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/avg_pressure"
@@ -70,7 +70,7 @@
         android:layout_marginTop="19dp"/>
 
     <TextView
-        android:text="TextView"
+        android:text="@string/journey_avg_pressure"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
@@ -79,7 +79,7 @@
         android:layout_alignParentStart="true"/>
 
     <TextView
-        android:text="TextView"
+        android:text="@string/journey_avg_speed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/avg_consumption"
@@ -88,7 +88,7 @@
         android:layout_alignParentStart="true"/>
 
     <TextView
-        android:text="TextView"
+        android:text="@string/journey_avg_consumption"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/avg_revs"
@@ -97,7 +97,7 @@
         android:layout_alignParentStart="true"/>
 
     <TextView
-        android:text="TextView"
+        android:text="@string/journey_max_pressure"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/max_speed"
@@ -106,7 +106,7 @@
         android:layout_alignParentStart="true"/>
 
     <TextView
-        android:text="TextView"
+        android:text="@string/journey_max_consumption"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/max_revs"

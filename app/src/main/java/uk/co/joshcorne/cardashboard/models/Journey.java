@@ -2,6 +2,7 @@ package uk.co.joshcorne.cardashboard.models;
 
 import com.orm.SugarRecord;
 import com.orm.dsl.Table;
+import com.orm.query.Select;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -14,16 +15,14 @@ import java.util.List;
 
 public class Journey extends SugarRecord
 {
-    private List<Ping> pings = new ArrayList<>();
-    private double distance;
+    private double distance = 0.0;
     private Date date;
 
     public Journey(){}
 
-    public Journey(double distance, List<Ping> pings, Date date)
+    public Journey(double distance, Date date)
     {
         this.distance = distance;
-        this.pings = pings;
         this.date = date;
     }
 
@@ -35,7 +34,7 @@ public class Journey extends SugarRecord
     public double getMaxSpeed()
     {
         double max = 0;
-        for(Ping p : pings)
+        for(Ping p : getPings())
         {
             if(max < p.getSpeed())
             {
@@ -45,10 +44,10 @@ public class Journey extends SugarRecord
         return max;
     }
 
-    public double getMaxRevs()
+    public int getMaxRevs()
     {
-        double max = 0;
-        for(Ping p : pings)
+        int max = 0;
+        for(Ping p : getPings())
         {
             if(max < p.getRpm())
             {
@@ -61,7 +60,7 @@ public class Journey extends SugarRecord
     public double getMaxConsumption()
     {
         double max = 0;
-        for(Ping p : pings)
+        for(Ping p : getPings())
         {
             if(max < p.getMpg())
             {
@@ -74,7 +73,7 @@ public class Journey extends SugarRecord
     public double getMaxPressure()
     {
         double max = 0;
-        for(Ping p : pings)
+        for(Ping p : getPings())
         {
             if(max < p.getFuelPressure())
             {
@@ -87,57 +86,74 @@ public class Journey extends SugarRecord
     public double getAvgSpeed()
     {
         float cumulative = 0;
-        for(Ping p : pings)
+        if(getPings().size() > 1)
         {
-            cumulative += p.getSpeed();
+            for(Ping p : getPings())
+            {
+                cumulative += p.getSpeed();
+            }
+            return cumulative / getPings().size();
         }
-        return cumulative / pings.size();
+        else
+        {
+            return 0;
+        }
     }
 
-    public double getAvgRevs()
+    public int getAvgRevs()
     {
-        float cumulative = 0;
-        for(Ping p : pings)
+        int cumulative = 0;
+        if(getPings().size() > 1)
         {
-            cumulative += p.getRpm();
+            for (Ping p : getPings())
+            {
+                cumulative += p.getRpm();
+            }
+            return cumulative / getPings().size();
         }
-        return cumulative / pings.size();
-
+        else
+        {
+            return 0;
+        }
     }
 
     public double getAvgConsumption()
     {
         float cumulative = 0;
-        for(Ping p : pings)
+        if(getPings().size() > 1)
         {
-            cumulative += p.getMpg();
+            for(Ping p : getPings())
+            {
+                cumulative += p.getMpg();
+            }
+            return cumulative / getPings().size();
         }
-        return cumulative / pings.size();
-
+        else
+        {
+            return 0;
+        }
     }
 
     public double getAvgPressure()
     {
         float cumulative = 0;
-        for(Ping p : pings)
+        if(getPings().size() > 1)
         {
-            cumulative += p.getFuelPressure();
+            for(Ping p : getPings())
+            {
+                cumulative += p.getFuelPressure();
+            }
+            return cumulative / getPings().size();
         }
-        return cumulative / pings.size();
+        else
+        {
+            return 0;
+        }
     }
 
     public List<Ping> getPings()
     {
-        return pings;
-    }
-
-    public void addPing(Ping ping)
-    {
-        this.pings.add(ping);
-    }
-    public void addPings(List<Ping> pings)
-    {
-        this.pings.addAll(pings);
+        return Ping.find(Ping.class, "journey_id = ?", Long.toString(getId()));
     }
 
     public Date getDate()
@@ -150,9 +166,9 @@ public class Journey extends SugarRecord
         return getDate().toString();
     }
 
-    public double getDistance()
+    public double getDistanceInMiles()
     {
-        return distance;
+        return distance * 0.000621371192;
     }
 
     public void setDistance(double distance)

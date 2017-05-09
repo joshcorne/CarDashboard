@@ -26,6 +26,8 @@ import com.github.pires.obd.commands.SpeedCommand;
 import com.github.pires.obd.commands.engine.RPMCommand;
 import com.github.pires.obd.commands.fuel.ConsumptionRateCommand;
 import com.github.pires.obd.commands.pressure.FuelPressureCommand;
+import com.github.pires.obd.exceptions.MisunderstoodCommandException;
+import com.github.pires.obd.exceptions.NoDataException;
 
 import java.io.IOException;
 import java.util.Date;
@@ -35,6 +37,7 @@ import java.util.TimerTask;
 import uk.co.joshcorne.cardashboard.models.Journey;
 import uk.co.joshcorne.cardashboard.models.Ping;
 
+import static uk.co.joshcorne.cardashboard.SettingsActivity.OBDCONNECTED;
 import static uk.co.joshcorne.cardashboard.SettingsActivity.ObdPreferenceFragment.sock;
 
 public class TrackerService extends Service
@@ -42,6 +45,7 @@ public class TrackerService extends Service
     private LocationManager mLocationManager;
     private LocationListener mLocationListener;
     private Location mLocation;
+    private Location mPrevLocation;
     private boolean recordLocation = true;
 
     private static final String TAG = "CARDASH";
@@ -52,7 +56,7 @@ public class TrackerService extends Service
     protected boolean isRunning = false;
 
     private Timer timer = new Timer();
-    private static final long UPDATE_INTERVAL = 5000;
+    private static final long UPDATE_INTERVAL = 1000;
 
     private Journey journey;
 
@@ -80,6 +84,7 @@ public class TrackerService extends Service
             @Override
             public void onLocationChanged(Location location)
             {
+                mPrevLocation = mLocation;
                 mLocation = location;
             }
 
@@ -104,6 +109,7 @@ public class TrackerService extends Service
 
         //Create a new journey with the current timestamp
         journey = new Journey(new Date());
+        journey.save();
         startRecordingLocation();
         startRecordingEcu();
 
@@ -123,7 +129,7 @@ public class TrackerService extends Service
     @Override
     public void onDestroy()
     {
-        Log.e(TAG, "TrackerService.onDestroy");
+        Log.d(TAG, "TrackerService.onDestroy");
         super.onDestroy();
         //Cancel ALL THE THINGS
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
@@ -148,7 +154,7 @@ public class TrackerService extends Service
     {
         try
         {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED || !SettingsActivity.OBDCONNECTED)
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED || !OBDCONNECTED)
             {
                 // Wi-Fi P2P is not enabled
                 throw new Exception("WiFi is not enabled or OBD not connected.");
@@ -179,61 +185,92 @@ public class TrackerService extends Service
                                       @Override
                                       public void run()
                                       {
-                                          Ping p = new Ping();
+                                          Ping p = new Ping(journey);
                                           if(recordLocation)
                                           {
                                               p.setLatitude(mLocation.getLatitude());
                                               p.setLongitude(mLocation.getLongitude());
                                               p.setAltitude(mLocation.getAltitude());
+
+                                              journey.setDistance(journey.getDistanceInMiles() + mPrevLocation.distanceTo(mLocation));
                                           }
 
+                                          Intent i = new Intent("VALUES_UPDATED");
                                           try
                                           {
-                                              rpmCommand.run(sock.getInputStream(), sock.getOutputStream());
-                                              p.setRpm(rpmCommand.getRPM());
+                                              try
+                                              {
+                                                  rpmCommand.run(sock.getInputStream(), sock.getOutputStream());
+                                                  p.setRpm(rpmCommand.getRPM());
+                                                  i.putExtra("revsVal", p.getRpm());
+                                              }
+                                              catch (NoDataException e)
+                                              {
+                                              }
 
-                                              fuelPressureCommand.run(sock.getInputStream(), sock.getOutputStream());
-                                              p.setFuelPressure(Float.valueOf(fuelPressureCommand.getResult()));
+                                              try
+                                              {
+                                                  fuelPressureCommand.run(sock.getInputStream(), sock.getOutputStream());
+                                                  p.setFuelPressure(Float.valueOf(fuelPressureCommand.getCalculatedResult()));
+                                                  i.putExtra("pressureVal", p.getFuelPressure());
+                                              }
+                                              catch (NoDataException e)
+                                              {
 
-                                              speedCommand.run(sock.getInputStream(), sock.getOutputStream());
-                                              p.setSpeed(speedCommand.getImperialSpeed());
+                                              }
 
-                                              consumptionRateCommand.run(sock.getInputStream(), sock.getOutputStream());
-                                              p.setMpg(consumptionRateCommand.getLitersPerHour());
+                                              try
+                                              {
+                                                  speedCommand.run(sock.getInputStream(), sock.getOutputStream());
+                                                  p.setSpeed(speedCommand.getImperialSpeed());
+                                                  i.putExtra("speedVal", p.getSpeed());
+                                              }
+                                              catch(NoDataException e)
+                                              {
 
-                                              //Once we have all the ping data, add it to the journey
-                                              journey.addPing(p);
+                                              }
 
-                                              Intent i = new Intent("VALUES_UPDATED");
-                                              i.putExtra("revsVal", p.getRpm());
-                                              i.putExtra("pressureVal", p.getFuelPressure());
-                                              i.putExtra("consumptionVal", p.getMpg());
-                                              i.putExtra("speedVal", p.getSpeed());
-
-                                              sendBroadcast(i);
+                                              try
+                                              {
+                                                  consumptionRateCommand.run(sock.getInputStream(), sock.getOutputStream());
+                                                  p.setMpg(consumptionRateCommand.getLitersPerHour());
+                                                  i.putExtra("consumptionVal", p.getMpg());
+                                              }
+                                              catch (NoDataException e)
+                                              {
+                                              }
                                           }
                                           catch (InterruptedException e)
                                           {
-                                              Toast.makeText(getApplicationContext(),
-                                                      "Recording data interrupted. " + e.getMessage(),
-                                                      Toast.LENGTH_SHORT).show();
+                                              Log.e("CARDASH", "Recording data interrupted.");
                                           }
                                           catch (IOException e)
                                           {
-                                              Toast.makeText(getApplicationContext(),
-                                                      "IO error in recording data. " + e.getMessage(),
-                                                      Toast.LENGTH_SHORT).show();
-
+                                              Log.e("CARDASH", "IO error in recording data.");
+                                          }
+                                          catch (MisunderstoodCommandException e)
+                                          {
+                                              Log.e("CARDASH", "Misunderstood command.");
+                                          }
+                                          catch (Exception e)
+                                          {
+                                              OBDCONNECTED = false;
+                                              stopService(MainActivity.tracker);
+                                          }
+                                          finally
+                                          {
+                                              sendBroadcast(i);
+                                              p.save();
                                           }
                                       }
                                   },
                 0,
                 UPDATE_INTERVAL);
-        sock.close();
     }
 
     private void startRecordingLocation()
     {
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
         {
             // TODO: Consider calling
@@ -248,6 +285,7 @@ public class TrackerService extends Service
         mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, mLocationListener);
         mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mLocationListener);
         mLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        mPrevLocation = mLocation;
     }
 
     public class ServiceBinder extends Binder

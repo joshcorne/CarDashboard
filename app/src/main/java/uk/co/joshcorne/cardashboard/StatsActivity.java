@@ -1,23 +1,20 @@
 package uk.co.joshcorne.cardashboard;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.orm.query.Select;
+
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import uk.co.joshcorne.cardashboard.models.Journey;
-import uk.co.joshcorne.cardashboard.uk.co.joshcorne.cardashboard.adapters.JourneyActivity;
 import uk.co.joshcorne.cardashboard.uk.co.joshcorne.cardashboard.adapters.StatsListAdapter;
 
 public class StatsActivity extends AppCompatActivity
@@ -31,11 +28,9 @@ public class StatsActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setTitle(getString(R.string.statistics_title));
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //TODO getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        List<Journey> journeys = new ArrayList<>();//Select.from(Journey.class).list();
-        journeys.add(new Journey(new Date()));
-        journeys.get(0).setDistance(123.00);
+        List<Journey> journeys = Select.from(Journey.class).orderBy("id").list();
 
         String[] rowDates = new String[journeys.size()];
         String[] rowDists = new String[journeys.size()];
@@ -45,7 +40,7 @@ public class StatsActivity extends AppCompatActivity
         for (int i = 0; i < journeys.size(); i++)
         {
             rowDates[i] = dt.format(journeys.get(i).getDate());
-            rowDists[i] = Double.toString(journeys.get(i).getDistance()) + " " +
+            rowDists[i] = String.format("%.2f", journeys.get(i).getDistanceInMiles()) + " " +
                     PreferenceManager.getDefaultSharedPreferences(this).getString("general_distance_format", "miles");
         }
 

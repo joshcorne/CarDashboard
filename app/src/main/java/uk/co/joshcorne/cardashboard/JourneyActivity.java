@@ -1,4 +1,4 @@
-package uk.co.joshcorne.cardashboard.uk.co.joshcorne.cardashboard.adapters;
+package uk.co.joshcorne.cardashboard;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -6,6 +6,10 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 
+import com.orm.query.Select;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -37,34 +41,25 @@ public class JourneyActivity extends AppCompatActivity
         TextView maxPressure = (TextView) findViewById(R.id.max_pressure);
 
         TextView dateTitle = (TextView) findViewById(R.id.journey_date);
+        SimpleDateFormat dt = new SimpleDateFormat("dd/MM/yyyy hh:mm");
 
-        List<Journey> db = new ArrayList<>();//Journey.find(Journey.class, "some = ?", String.valueOf(i.getIntExtra("pos", 0)));
-        Ping p = new Ping();
-        p.setSpeed(1.1);
-        p.setMpg(1.1);
-        p.setRpm(1);
-        p.setFuelPressure(1.1);
-        Journey a = new Journey(new Date());
-        a.addPing(p);
-        db.add(a);
+        Journey j = Select.from(Journey.class).orderBy("id").list().get(i.getIntExtra("pos", 0));
 
-        if(db.size() > 0 && dateTitle != null
+        if(j != null && dateTitle != null
                 && avgSpeed != null && avgConsumption != null && avgRevs != null && avgPressure != null
                 && maxSpeed != null && maxConsumption != null && maxRevs != null && maxPressure != null)
         {
-            Journey j = db.get(0);
+            dateTitle.setText(dt.format(j.getDate()));
 
-            dateTitle.setText(j.getDate().toString());
+            avgRevs.setText(getString(R.string.journey_avg_revs) + " " + String.valueOf(j.getAvgRevs()) + "RPM");
+            avgConsumption.setText(getString(R.string.journey_avg_consumption) + " " + String.format("%.2f", j.getAvgConsumption()) + " litres per hour");
+            avgSpeed.setText(getString(R.string.journey_avg_speed) + " " + String.format("%.2f", j.getAvgSpeed()) + "MPH");
+            avgPressure.setText(getString(R.string.journey_avg_pressure) + " " + String.format("%.2f", j.getAvgPressure()) + "kPa");
 
-            avgRevs.setText(String.valueOf(j.getAvgRevs()));
-            avgConsumption.setText(String.valueOf(j.getAvgConsumption()));
-            avgSpeed.setText(String.valueOf(j.getAvgSpeed()));
-            avgPressure.setText(String.valueOf(j.getAvgPressure()));
-
-            maxRevs.setText(String.valueOf(j.getMaxRevs()));
-            maxConsumption.setText(String.valueOf(j.getMaxConsumption()));
-            maxSpeed.setText(String.valueOf(j.getMaxSpeed()));
-            maxPressure.setText(String.valueOf(j.getMaxPressure()));
+            maxRevs.setText(getString(R.string.journey_max_revs) + " " + String.valueOf(j.getMaxRevs()) + "RPM");
+            maxConsumption.setText(getString(R.string.journey_max_consumption) + " " + String.format("%.2f", j.getMaxConsumption()) + " litres per hour");
+            maxSpeed.setText(getString(R.string.journey_max_speed) + " " + String.format("%.2f", j.getMaxSpeed()) + "MPH");
+            maxPressure.setText(getString(R.string.journey_max_pressure) + " " + String.format("%.2f", j.getMaxPressure()) + "kPa");
         }
     }
 }

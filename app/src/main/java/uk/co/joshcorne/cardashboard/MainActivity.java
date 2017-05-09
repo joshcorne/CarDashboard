@@ -1,6 +1,7 @@
 package uk.co.joshcorne.cardashboard;
 
 import android.Manifest;
+import android.app.Application;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -34,6 +35,7 @@ import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
 import com.github.pires.obd.commands.protocol.TimeoutCommand;
 import com.github.pires.obd.enums.ObdProtocols;
 import com.orm.SugarContext;
+import com.orm.query.Select;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
@@ -53,9 +55,11 @@ import com.wrapper.spotify.models.Page;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,25 +69,97 @@ import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.channels.FileChannel;
 import java.security.Permission;
+import java.sql.Time;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 import uk.co.joshcorne.cardashboard.models.Journey;
 import uk.co.joshcorne.cardashboard.models.Ping;
 
+import static uk.co.joshcorne.cardashboard.SettingsActivity.ObdPreferenceFragment.sock;
+
 public class MainActivity extends AppCompatActivity implements SpotifyPlayer.NotificationCallback, ConnectionStateCallback
 {
 
     public static boolean TRACKING = false;
-    public Intent tracker;
+    public static Intent tracker;
+    private ArrayList<String> troubleCodes = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        /** TO DELETE **
+        Journey.deleteAll(Journey.class);
+        Ping.deleteAll(Ping.class);
+
+        Date d;
+        final Random random = new Random();
+        final int millisInDay = 24*60*60*1000;
+        try
+        {
+            for(int i = 1; i <18; i++)
+            {
+                Time time = new Time((long)random.nextInt(millisInDay));
+                d = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse("2017-04-" + i + " " + time.toString());
+                Journey j = new Journey(d);
+                j.setDistance(4 + ( 200 - 4) * random.nextDouble());
+                j.save();
+                for(int a = 0; a<10; a++)
+                {
+                    Ping p = new Ping(j);
+                    p.setSpeed(70 * random.nextDouble());
+                    p.setFuelPressure(45 + (78-45) * random.nextDouble());
+                    p.setMpg(35 + (50 - 35) * random.nextDouble());
+                    p.setRpm((random.nextInt() % (4000 - 1500 + 1)) + 1);
+                    p.save();
+                }
+            }
+        }
+        catch (ParseException p)
+        {
+            Log.d("DARCASH", "parse excpetion");
+        }
+        /***************/
+
+        try
+        {
+            File sd = Environment.getExternalStorageDirectory();
+            File data = Environment.getDataDirectory();
+
+            if(sd.canWrite())
+            {
+                String cur = "/data/data/" + getPackageName() + "/databases/car.db";
+                String bak = "bak.db";
+
+                File curDb = new File(cur);
+                File bakDb = new File(sd, bak);
+
+                if(curDb.exists())
+                {
+                    FileChannel src = new FileInputStream(curDb).getChannel();
+                    FileChannel out = new FileOutputStream(bakDb).getChannel();
+                    out.transferFrom(src, 0, src.size());
+                    src.close();
+                    out.close();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Log.e("a", e.getMessage());
+        }
+
+        this.finishAffinity();
 
         if(!checkDataBase())
         {
@@ -126,6 +202,29 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                         openStats(v);
                     }
                 });
+
+        TextView allTimeConsumptionAvg = (TextView) findViewById(R.id.allTimeConsumptionAvgTextView);
+        TextView allTimeSpeedAvg = (TextView) findViewById(R.id.allTimeSpeedAvgTextView);
+        TextView allTimeRevsAvg = (TextView) findViewById(R.id.allTimeRevsAvgTextView);
+        TextView allTimePressureAvg = (TextView) findViewById(R.id.allTimePressureAvgTextView);
+
+        Averages avg = getAvgConsumption(Select.from(Journey.class).list());
+        if(avg != null && avg.speed != 0)
+        {
+            allTimeSpeedAvg.setText("Speed avg: " + String.format("%.2f", avg.speed) + "MPH");
+        }
+        if(avg != null && avg.consumption != 0)
+        {
+            allTimeConsumptionAvg.setText("Consumption avg (litres/hour): " + String.format("%.2f", avg.consumption));
+        }
+        if(avg != null && avg.revs != 0)
+        {
+            allTimeRevsAvg.setText("Revs avg: " + avg.revs + "RPM");
+        }
+        if(avg != null && avg.pressure != 0)
+        {
+            allTimePressureAvg.setText("Pressure avg: " + String.format("%.2f", avg.pressure) + "kPa");
+        }
     }
 
     @Override
@@ -138,6 +237,17 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         if(mPlayer != null)
         {
             Spotify.destroyPlayer(this);
+        }
+        if(sock != null)
+        {
+            try
+            {
+                sock.close();
+            }
+            catch(Exception e)
+            {
+                Log.d("CARDASH", "Socket not closed properly.");
+            }
         }
     }
 
@@ -319,7 +429,9 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
     public void openAlerts(View view)
     {
-        startActivity(new Intent(this, AlertsActivity.class));
+        Intent i = new Intent(this, AlertsActivity.class);
+        i.putStringArrayListExtra("codes", troubleCodes);
+        startActivity(i);
     }
 
     private void toggleJourneyBtnState()
@@ -390,12 +502,58 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
     protected double getAvgSpeed(List<Journey> journeys)
     {
-        double avgSpeed = 0;
-        for(Journey j: journeys)
+        if(journeys.size() > 0)
         {
-            avgSpeed += j.getAvgSpeed();
+            double avgSpeed = 0;
+            for (Journey j : journeys)
+            {
+                avgSpeed += j.getAvgSpeed();
+            }
+            return avgSpeed / journeys.size();
         }
-        return avgSpeed / journeys.size();
+        else
+        {
+            return 0;
+        }
+    }
+
+    class Averages{
+        Averages(double speed, int revs, double pressure, double consumption)
+        {
+            this.speed = speed;
+            this.revs = revs;
+            this.pressure = pressure;
+            this.consumption = consumption;
+        }
+
+        double speed;
+        int revs;
+        double consumption;
+        double pressure;
+    }
+
+    protected Averages getAvgConsumption(List<Journey> journeys)
+    {
+        if(journeys.size() > 0)
+        {
+            double avgSpeed = 0;
+            int avgRevs = 0;
+            double avgPressure = 0;
+            double avgConsumption = 0;
+            for (Journey j : journeys)
+            {
+                avgSpeed += j.getAvgSpeed();
+                avgRevs += j.getAvgRevs();
+                avgPressure += j.getAvgPressure();
+                avgConsumption += j.getAvgConsumption();
+            }
+            int size = journeys.size();
+            return new Averages(avgSpeed / size, avgRevs / size, avgPressure / size, avgConsumption / size);
+        }
+        else
+        {
+            return null;
+        }
     }
 
     private final String CLIENT_ID = "c7ec83d0851649a4845bf6354fdd7c9f";
@@ -430,7 +588,6 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("Loading");
         progressDialog.setMessage("Wait while loading...");
-        progressDialog.setCancelable(false);
         progressDialog.show();
 
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
@@ -452,12 +609,17 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             TextView speed = (TextView) findViewById(R.id.speedTextView);
             TextView consumption = (TextView) findViewById(R.id.consumptionTextView);
 
+            double pressureVal = intent.getDoubleExtra("pressureVal", 0.0);
+            double revsVal = intent.getIntExtra("revsVal", 0);
+            double speedVal = intent.getDoubleExtra("speedVal", 0.0);
+            double consumptionVal = intent.getDoubleExtra("consumptionVal", 0.0);
+
             if (pressure != null && revs != null && speed != null && consumption != null)
             {
-                pressure.setText(getString(R.string.live_fuel_pressure) + " " + intent.getDoubleExtra("pressureVal", 0.0));
-                revs.setText(getString(R.string.live_revs) + " " + intent.getDoubleExtra("revsVal", 0.0));
-                speed.setText(getString(R.string.live_speed) + " " + intent.getDoubleExtra("speedVal", 0.0));
-                consumption.setText(getString(R.string.live_fuel_consumption) + " " + intent.getDoubleExtra("consumptionVal", 0.0));
+                pressure.setText(getString(R.string.live_fuel_pressure) + " " + String.format("%.2f", pressureVal) + "kPa");
+                revs.setText(getString(R.string.live_revs) + " " + revsVal + "RPM");
+                speed.setText(getString(R.string.live_speed) + " " + String.format("%.2f", speedVal) + "MPH");
+                consumption.setText(getString(R.string.live_fuel_consumption) + " " + String.format("%.2f", consumptionVal) + " litres/hour");
             }
         }
     };
@@ -467,10 +629,22 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         @Override
         public void onReceive(Context context, Intent intent)
         {
-            //TODO: CHANGE
-            ListView listView = (ListView) findViewById(R.id.journeyList);
-            //TODO: Populate list
-            List<String> descriptions = intent.getStringArrayListExtra("descriptions");
+            TextView code = (TextView) findViewById(R.id.code);
+            ArrayList<String> response = intent.getStringArrayListExtra("code");
+            if(response != null && response.size() > 0)
+            {
+                String s = "";
+                for (int i = 0; i < response.size(); i++)
+                {
+                    troubleCodes.add(response.get(i));
+                    s = s + response.get(i);
+                    if(i < (response.size() - 1))
+                    {
+                        s = s + ", ";
+                    }
+                    code.setText(s);
+                }
+            }
         }
     };
 

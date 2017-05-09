@@ -5,7 +5,7 @@
     <string name="end_btn_text">End</string>
     <string name="maps_search_placeholder">Where are we going?</string>
     <string name="title_activity_settings">Settings</string>
-    <string name="search_btn">Search</string>
+    <string name="search_btn">Go</string>
     <string name="settings_btn">Settings</string>
     <string name="stats_btn">Statistics</string>
     <string name="alerts_btn">Alerts</string>
@@ -38,15 +38,31 @@
 
     <string name="play_button_text">Play</string>
     <string name="pause_button_text">Pause</string>
-    <string name="skip_button_text">Next</string>
-    <string name="prev_button_text">Previous</string>
+    <string name="skip_button_text">&gt;&gt;</string>
+    <string name="prev_button_text">&lt;&lt;</string>
     <string name="journey_statistics_title">Journey Statistics</string>
     <string name="statistics_title">Statistics</string>
     <string name="distance_format_title">Distance Format</string>
     <string name="miles">Miles</string>
-    <string name="all_time_speed_average">All time speed average:</string>
-    <string name="all_time_consumption_rate_average">All time consumption rate average:</string>
+    <string name="all_time_speed_average">Speed avg:</string>
+    <string name="all_time_consumption_rate_average">Consumption rate avg:</string>
     <string name="alerts_title">Alerts</string>
     <string name="pref_header_obd">OBD2 Reader</string>
+    <string name="live_subheading">Live</string>
+    <string name="all_time_subheading">All Time</string>
+    <string name="all_time_revs_average">Revs Avg</string>
+    <string name="all_time_pressure_average">Pressure Avg</string>
+    <string name="journey_avg_revs">Revs:</string>
+    <string name="journey_avg_pressure">Pressure:</string>
+    <string name="journey_avg_speed">Speed:</string>
+    <string name="journey_avg_consumption">Consumption:</string>
+    <string name="journey_averages_subheading">Averages</string>
+    <string name="journey_maximums_subheading">Maximums</string>
+    <string name="journey_heading">Journey</string>
+    <string name="journey_max_speed">Speed:</string>
+    <string name="journey_max_revs">Revs:</string>
+    <string name="journey_max_pressure">Pressure:</string>
+    <string name="journey_max_consumption">Consumption:</string>
+    <string name="no_trouble_codes_home">No problems to report.</string>
 
 </resources>

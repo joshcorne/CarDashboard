@@ -2,6 +2,7 @@ package uk.co.joshcorne.cardashboard;
 
 
 import android.annotation.TargetApi;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -12,11 +13,15 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.MenuItem;
+import android.widget.Toast;
 
+import com.github.pires.obd.commands.control.TroubleCodesCommand;
 import com.github.pires.obd.commands.protocol.EchoOffCommand;
 import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
 import com.github.pires.obd.commands.protocol.ObdResetCommand;
@@ -26,14 +31,23 @@ import com.github.pires.obd.commands.temperature.AmbientAirTemperatureCommand;
 import com.github.pires.obd.enums.ObdProtocols;
 import com.spotify.sdk.android.player.Player;
 import com.spotify.sdk.android.player.SpotifyPlayer;
+import com.wrapper.spotify.methods.GetMySavedTracksRequest;
+import com.wrapper.spotify.models.LibraryTrack;
+import com.wrapper.spotify.models.Page;
 
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import uk.co.joshcorne.cardashboard.models.TroubleCode;
+
 import static uk.co.joshcorne.cardashboard.SettingsActivity.ObdPreferenceFragment.ip;
+import static uk.co.joshcorne.cardashboard.SettingsActivity.ObdPreferenceFragment.oem;
 import static uk.co.joshcorne.cardashboard.SettingsActivity.ObdPreferenceFragment.port;
+import static uk.co.joshcorne.cardashboard.SettingsActivity.ObdPreferenceFragment.sock;
+import static uk.co.joshcorne.cardashboard.SettingsActivity.connectionLoading;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -50,6 +64,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity
 {
     private static final String TAG = "CARDASH";
     public static boolean OBDCONNECTED = false;
+    protected static ProgressDialog connectionLoading;
     /**
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
@@ -125,6 +140,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity
 
         port = PreferenceManager.getDefaultSharedPreferences(this).getString("general_ip_port", "35000");
         ip = PreferenceManager.getDefaultSharedPreferences(this).getString("general_ip_addr", "192.168.0.10");
+        oem = PreferenceManager.getDefaultSharedPreferences(this).getString("car_make", "unset");
+        connectionLoading = new ProgressDialog(this);
     }
 
     /**
@@ -136,7 +153,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity
         if (actionBar != null)
         {
             // Show the Up button in the action bar.
-            actionBar.setDisplayHomeAsUpEnabled(true);
+            //TODO actionBar.setDisplayHomeAsUpEnabled(true);
         }
     }
 
@@ -187,7 +204,14 @@ public class SettingsActivity extends AppCompatPreferenceActivity
                 button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                     @Override
                     public boolean onPreferenceClick(Preference arg0) {
-                        connectToOdbReader();
+                        if(OBDCONNECTED)
+                        {
+                            Toast.makeText(getActivity(), "Already connected.", Toast.LENGTH_SHORT).show();
+                        }
+                        else
+                        {
+                            connectToOdbReader();
+                        }
                         return true;
                     }
                 });
@@ -209,6 +233,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity
         static String port;
         static String ip;
         static Socket sock;
+        static String oem;
 
         private void connectToOdbReader()
         {
@@ -216,14 +241,31 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             try
             {
                 sock = connectTask.execute(ip, port).get();
-                OBDCONNECTED = sock != null;
-                Intent i = new Intent();
+                if(sock != null)
+                {
+                    OBDCONNECTED = true;
+                    Intent i = new Intent("ALERTS_UPDATED");
 
-                //TODO: Run MIL command, get descriptions, populate list, send
-                ArrayList<String> descriptions = new ArrayList<>();
+                    //TODO Sort this out
+                    ArrayList<String> receivedCodes = new ArrayList<>();
+                    List<TroubleCode> troubleCodes = new ArrayList<>();
 
-                i.putStringArrayListExtra("descriptions", descriptions);
-                //getContext().sendBroadcast(i);
+                    /*
+                    for (TroubleCode t :
+                            troubleCodes)
+                    {
+                        receivedCodes.add(t.getDtcKey());
+                    }
+
+                    i.putStringArrayListExtra("descriptions", receivedCodes);*/
+
+                    i.putStringArrayListExtra("code", new TroubleCodeTask().execute(new TroubleCodesCommand()).get());
+                    getActivity().sendBroadcast(i);
+                }
+                else
+                {
+                    OBDCONNECTED = false;
+                }
             }
             catch(Exception e)
             {
@@ -251,6 +293,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("general_home_addr"));
+            bindPreferenceSummaryToValue(findPreference("car_make"));
 
             Preference spotify = findPreference("spotifyLogout");
             if(spotify != null)
@@ -292,10 +335,18 @@ public class SettingsActivity extends AppCompatPreferenceActivity
 class ConnectTask extends AsyncTask<String, Void, Socket>
 {
     private static final int OBDTIMEOUT = 125;
+    protected void onPreExecute(String... params)
+    {
+        connectionLoading.setTitle("OBD2 Connection  ");
+        connectionLoading.setMessage("Connecting...");
+        connectionLoading.show();
+    }
 
     protected Socket doInBackground(String... params) {
         try
         {
+            Log.d("CARDASH", "Connecting...");
+
             Socket sock = new Socket(InetAddress.getByName(params[0]), Integer.parseInt(params[1]));
 
             //Set up the OBD connection
@@ -305,6 +356,10 @@ class ConnectTask extends AsyncTask<String, Void, Socket>
             new TimeoutCommand(OBDTIMEOUT).run(sock.getInputStream(), sock.getOutputStream());
             SelectProtocolCommand protocolCommand = new SelectProtocolCommand(ObdProtocols.AUTO);
             protocolCommand.run(sock.getInputStream(), sock.getOutputStream());
+            String protocol = protocolCommand.getFormattedResult();
+
+            Log.d("CARDASH", "Connected.");
+
             //new AmbientAirTemperatureCommand().run(sock.getInputStream(), sock.getOutputStream());
             return sock;
         }
@@ -317,6 +372,36 @@ class ConnectTask extends AsyncTask<String, Void, Socket>
     protected void onPostExecute(String... params) {
         // TODO: check this.exception
         // TODO: do something with the feed
+        connectionLoading.dismiss();
     }
 }
 
+class TroubleCodeTask extends AsyncTask<TroubleCodesCommand, Void, ArrayList<String>>
+{
+    protected ArrayList<String> doInBackground(TroubleCodesCommand... params) {
+        //TODO Sort this out
+        String response = null;
+        String[] codes = null;
+        try
+        {
+            if(sock != null && SettingsActivity.OBDCONNECTED)
+            {
+                //Run command and get result
+                params[0].run(sock.getInputStream(), sock.getOutputStream());
+                response = params[0].getCalculatedResult();
+
+                codes = response.split("\\n");
+            }
+        }
+        catch(Exception e)
+        {
+            Log.e("CARDASH", e.getMessage());
+        }
+        return codes != null ? new ArrayList<>(Arrays.asList(codes)) : null;
+    }
+
+    protected void onPostExecute(String... params) {
+        // TODO: check this.exception
+        // TODO: do something with the feed
+    }
+}

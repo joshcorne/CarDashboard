@@ -14,13 +14,18 @@ public class Ping extends SugarRecord
     private double speed;
     private double altitude;
     private double fuelPressure;
-    private double rpm;
-    private double acceleration;
+    private int rpm;
     private long time;
+    private Journey journey;
+    private Long journeyId;
 
-    public Ping()
+    public Ping() {}
+
+    public Ping(Journey j)
     {
         setTime(System.currentTimeMillis());
+        journey = j;
+        journeyId = j.getId();
     }
 
     public double getLatitude()
@@ -83,24 +88,14 @@ public class Ping extends SugarRecord
         this.fuelPressure = fuelPressure;
     }
 
-    public double getRpm()
+    public int getRpm()
     {
         return rpm;
     }
 
-    public void setRpm(double rpm)
+    public void setRpm(int rpm)
     {
         this.rpm = rpm;
-    }
-
-    public double getAcceleration()
-    {
-        return acceleration;
-    }
-
-    public void setAcceleration(double acceleration)
-    {
-        this.acceleration = acceleration;
     }
 
     public long getTime()

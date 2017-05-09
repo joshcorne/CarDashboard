@@ -12,7 +12,7 @@
 
     <ListPreference
         android:defaultValue="@string/pref_default_make"
-        android:key="general_oem"
+        android:key="car_make"
         android:entries="@array/make"
         android:entryValues="@array/make"
         android:title="@string/pref_title_make" />
