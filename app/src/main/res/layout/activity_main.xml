@@ -114,19 +114,19 @@
 
                     <TextView
                         android:text="@string/live_speed"
-                        android:layout_width="157dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:id="@+id/speedTextView"/>
 
                     <TextView
                         android:text="@string/live_fuel_consumption"
-                        android:layout_width="152dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:id="@+id/consumptionTextView"/>
 
                     <TextView
                         android:text="@string/live_fuel_pressure"
-                        android:layout_width="151dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:id="@+id/pressureTextView"/>
 
@@ -143,35 +143,39 @@
                         android:layout_marginTop="10dp"
                         android:id="@+id/all_time_subheading"
                         tools:text="All time"
-                        android:textSize="18sp"
+                        android:textSize="16sp"
                         android:textStyle="normal|bold"/>
 
                     <TextView
                         android:text="@string/all_time_speed_average"
-                        android:layout_width="152dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/allTimeSpeedAvgTextView"/>
+                        android:id="@+id/allTimeSpeedAvgTextView"
+                        android:textSize="12sp"/>
 
                     <TextView
                         android:text="@string/all_time_revs_average"
-                        android:layout_width="167dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:maxWidth="200dp"
-                        android:id="@+id/allTimeRevsAvgTextView"/>
+                        android:id="@+id/allTimeRevsAvgTextView"
+                        android:textSize="12sp"/>
 
                     <TextView
                         android:text="@string/all_time_consumption_rate_average"
-                        android:layout_width="167dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:maxWidth="200dp"
-                        android:id="@+id/allTimeConsumptionAvgTextView"/>
+                        android:id="@+id/allTimeConsumptionAvgTextView"
+                        android:textSize="12sp"/>
 
                     <TextView
                         android:text="@string/all_time_pressure_average"
-                        android:layout_width="167dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:maxWidth="200dp"
-                        android:id="@+id/allTimePressureAvgTextView"/>
+                        android:id="@+id/allTimePressureAvgTextView"
+                        android:textSize="12sp"/>
 
                 </LinearLayout>
             </ScrollView>

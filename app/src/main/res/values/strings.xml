@@ -31,7 +31,7 @@
     <string name="title_activity_stats">StatsActivity</string>
     <string name="title_activity_alerts">AlertsActivity</string>
     <string name="live_speed">Speed:</string>
-    <string name="live_fuel_consumption">Fuel Consumption:</string>
+    <string name="live_fuel_consumption">Consumption:</string>
     <string name="live_fuel_pressure">Fuel Pressure:</string>
     <string name="live_revs">Revs:</string>
     <string name="default_ip_addr">192.168.0.10</string>
@@ -45,7 +45,7 @@
     <string name="distance_format_title">Distance Format</string>
     <string name="miles">Miles</string>
     <string name="all_time_speed_average">Speed avg:</string>
-    <string name="all_time_consumption_rate_average">Consumption rate avg:</string>
+    <string name="all_time_consumption_rate_average">Consumption avg:</string>
     <string name="alerts_title">Alerts</string>
     <string name="pref_header_obd">OBD2 Reader</string>
     <string name="live_subheading">Live</string>

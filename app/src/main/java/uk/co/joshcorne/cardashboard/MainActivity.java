@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         {
             Log.d("DARCASH", "parse excpetion");
         }
-        /***************/
+        /***************
 
         try
         {
@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             Log.e("a", e.getMessage());
         }
 
-        this.finishAffinity();
+        this.finishAffinity();*/
 
         if(!checkDataBase())
         {

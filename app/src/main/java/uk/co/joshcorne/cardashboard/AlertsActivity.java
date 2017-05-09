@@ -1,31 +1,16 @@
 package uk.co.joshcorne.cardashboard;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.pires.obd.commands.control.TroubleCodesCommand;
-import com.orm.SugarApp;
-import com.orm.SugarContext;
-import com.orm.SugarDb;
-import com.orm.query.Select;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 import uk.co.joshcorne.cardashboard.models.TroubleCode;
-import uk.co.joshcorne.cardashboard.uk.co.joshcorne.cardashboard.adapters.StatsListAdapter;
+import uk.co.joshcorne.cardashboard.uk.co.joshcorne.cardashboard.adapters.AlertsListAdapter;
 
 import static uk.co.joshcorne.cardashboard.SettingsActivity.ObdPreferenceFragment.sock;
 
@@ -100,7 +85,7 @@ public class AlertsActivity extends AppCompatActivity
         }
 
         ListView alertListView = (ListView) findViewById(R.id.alerts_desc_list);
-        StatsListAdapter listAdapter = new StatsListAdapter(this, receivedCodes.toArray(new String[receivedCodes.size()]), receivedDescs);
+        AlertsListAdapter listAdapter = new AlertsListAdapter(this, receivedCodes.toArray(new String[receivedCodes.size()]), receivedDescs);
         if(alertListView != null)
         {
             listAdapter.getCount();

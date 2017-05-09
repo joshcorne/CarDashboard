@@ -27,21 +27,13 @@ import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
 import com.github.pires.obd.commands.protocol.ObdResetCommand;
 import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
 import com.github.pires.obd.commands.protocol.TimeoutCommand;
-import com.github.pires.obd.commands.temperature.AmbientAirTemperatureCommand;
 import com.github.pires.obd.enums.ObdProtocols;
-import com.spotify.sdk.android.player.Player;
-import com.spotify.sdk.android.player.SpotifyPlayer;
-import com.wrapper.spotify.methods.GetMySavedTracksRequest;
-import com.wrapper.spotify.models.LibraryTrack;
-import com.wrapper.spotify.models.Page;
 
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import uk.co.joshcorne.cardashboard.models.TroubleCode;
 
 import static uk.co.joshcorne.cardashboard.SettingsActivity.ObdPreferenceFragment.ip;
 import static uk.co.joshcorne.cardashboard.SettingsActivity.ObdPreferenceFragment.oem;
@@ -196,8 +188,36 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             addPreferencesFromResource(R.xml.pref_obd);
             setHasOptionsMenu(true);
 
-            bindPreferenceSummaryToValue(findPreference("general_ip_addr"));
-            bindPreferenceSummaryToValue(findPreference("general_ip_port"));
+            Preference addrPref = findPreference("general_ip_addr");
+            Preference portPref = findPreference("general_ip_port");
+            if(addrPref != null)
+            {
+                addrPref.setSummary(ip);
+                addrPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+                {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object o)
+                    {
+                        ip = o.toString();
+                        preference.setSummary(o.toString());
+                        return true;
+                    }
+                });
+            }
+            if(portPref != null)
+            {
+                portPref.setSummary(port);
+                portPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+                {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object o)
+                    {
+                        port = o.toString();
+                        preference.setSummary(o.toString());
+                        return true;
+                    }
+                });
+            }
 
             Preference button = findPreference("obdConnect");
             if (button != null) {
@@ -246,18 +266,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity
                     OBDCONNECTED = true;
                     Intent i = new Intent("ALERTS_UPDATED");
 
-                    //TODO Sort this out
-                    ArrayList<String> receivedCodes = new ArrayList<>();
-                    List<TroubleCode> troubleCodes = new ArrayList<>();
-
-                    /*
-                    for (TroubleCode t :
-                            troubleCodes)
-                    {
-                        receivedCodes.add(t.getDtcKey());
-                    }
-
-                    i.putStringArrayListExtra("descriptions", receivedCodes);*/
+                    Toast.makeText(getActivity(), "Connected.", Toast.LENGTH_SHORT).show();
 
                     i.putStringArrayListExtra("code", new TroubleCodeTask().execute(new TroubleCodesCommand()).get());
                     getActivity().sendBroadcast(i);
@@ -360,7 +369,6 @@ class ConnectTask extends AsyncTask<String, Void, Socket>
 
             Log.d("CARDASH", "Connected.");
 
-            //new AmbientAirTemperatureCommand().run(sock.getInputStream(), sock.getOutputStream());
             return sock;
         }
         catch(Exception e)
