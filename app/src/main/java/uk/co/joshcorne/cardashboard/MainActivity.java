@@ -61,6 +61,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -82,6 +83,7 @@ import java.util.concurrent.ExecutionException;
 
 import uk.co.joshcorne.cardashboard.models.Journey;
 import uk.co.joshcorne.cardashboard.models.Ping;
+import uk.co.joshcorne.cardashboard.models.TroubleCode;
 
 import static uk.co.joshcorne.cardashboard.SettingsActivity.ObdPreferenceFragment.sock;
 
@@ -281,6 +283,44 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             myOutput.flush();
             myOutput.close();
             myInput.close();
+
+            InputStream input = this.getAssets().open("TROUBLE_CODE.csv");
+            String out = this.getFilesDir().getPath() + File.separator + "trouble.csv";
+
+            OutputStream outputStream = new FileOutputStream(out);
+
+            byte[] buf = new byte[1024];
+            int len;
+            while((len = input.read(buf)) > 0)
+            {
+                outputStream.write(buf, 0, len);
+            }
+
+            input.close();
+            outputStream.flush();
+            outputStream.close();
+
+            String csv = out;
+            BufferedReader br = null;
+            String line;
+            String csvSplitBy = ",";
+
+            try
+            {
+                br = new BufferedReader(new FileReader(csv));
+                while((line = br.readLine()) != null)
+                {
+                    String[] values = line.split(csvSplitBy);
+
+                    TroubleCode t = new TroubleCode(values[0], values[1]);
+                    t.setDtcValue(values[2]);
+                    t.save();
+                }
+            }
+            catch (Exception e)
+            {
+                Toast.makeText(this, "Trouble codes copying failed.", Toast.LENGTH_SHORT).show();
+            }
         }
     }
     protected boolean checkDataBase()
